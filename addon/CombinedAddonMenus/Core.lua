@@ -56,7 +56,6 @@ local function help()
 end
 
 SLASH_COMBINEDADDONMENUS1 = "/cam"
-SLASH_COMBINEDADDONMENUS2 = "/mmm"   -- the old command still works
 SlashCmdList.COMBINEDADDONMENUS = function(msg)
   msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if msg == "" then
@@ -99,11 +98,6 @@ events:RegisterEvent("PLAYER_LOGIN")
 events:SetScript("OnEvent", function(self, event, arg1)
   if event == "ADDON_LOADED" and arg1 == ADDON then
     CombinedAddonMenusDB = type(CombinedAddonMenusDB) == "table" and CombinedAddonMenusDB or {}
-    -- The addon was called Mod Menu Mod before 0.3.0. Keep the old settings once.
-    if next(CombinedAddonMenusDB) == nil and type(ModMenuModDB) == "table" then
-      for k, v in pairs(ModMenuModDB) do CombinedAddonMenusDB[k] = v end
-    end
-    ModMenuModDB = nil
     ns.db = CombinedAddonMenusDB
     ns.db.minimap = nil   -- 0.1.x stored its LibDBIcon gear icon here; replaced by the M button
     fill(ns.db, DEFAULTS)
