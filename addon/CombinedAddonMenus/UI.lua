@@ -569,10 +569,20 @@ function UI.refresh(isRetry)
   end
   if ns.db then
     local t = date and date("%H:%M:%S") or nil
+    -- What the scan said about slash commands, for the saved report and for chat when it found none.
+    local notes = {}
+    for _, line in ipairs(ns.Scan.report()) do
+      if line:find("^Slash") or line:find("^Step") then notes[#notes + 1] = line end
+    end
     if isRetry then
       if n ~= lastCount then ns.db.late = { first = lastCount, later = n, time = t } end
+      ns.db.viewRetry = { buttons = n, slash = slash, time = t, notes = notes }
     else
-      ns.db.view = { rows = #rows, buttons = n, slash = slash, time = t }
+      ns.db.view = { rows = #rows, buttons = n, slash = slash, time = t, notes = notes }
+    end
+    if slash == 0 and not isRetry then
+      ns.say("No slash command buttons were found this time. The scan said: "
+        .. (#notes > 0 and table.concat(notes, " | ") or "nothing"))
     end
   end
   lastCount = n
