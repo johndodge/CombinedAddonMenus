@@ -458,6 +458,24 @@ local function realSlashTable()
   return SlashCmdList, "plain"
 end
 
+-- All slash commands as { key, fn, tbl }. SlashCmdList is a proxy: the game's commands (and, after a
+-- while, the addons' too) are in the table behind it. Right after a reload the addons' commands can
+-- still sit in the proxy itself (user log 2026-11-21: 0 addon commands behind the proxy at the first
+-- look, 92 later). So look in both places.
+local function slashEntries()
+  local real = realSlashTable()
+  local out, seen = {}, {}
+  for _, tbl in ipairs({ SlashCmdList, real }) do
+    for key, fn in pairs(tbl) do
+      if type(key) == "string" and type(fn) == "function" and not seen[key] then
+        seen[key] = true
+        out[#out + 1] = { key = key, fn = fn, tbl = tbl }
+      end
+    end
+  end
+  return out
+end
+
 local function aliases(key)
   local out = {}
   for i = 1, 20 do
@@ -471,12 +489,9 @@ end
 -- Finds the handler for a typed command such as "/dbm". Returns handler, key.
 function Scan.findSlash(word)
   word = word:lower()
-  local real = realSlashTable()
-  for key, fn in pairs(real) do
-    if type(key) == "string" and type(fn) == "function" then
-      for _, c in ipairs(aliases(key)) do
-        if c:lower() == word then return fn, key end
-      end
+  for _, e in ipairs(slashEntries()) do
+    for _, c in ipairs(aliases(e.key)) do
+      if c:lower() == word then return e.fn, e.key end
     end
   end
   return nil
@@ -508,10 +523,12 @@ end
 
 local function scanSlash(rows)
   local real, how = realSlashTable()
-  local found, game = 0, 0
-  for key, fn in pairs(real) do
-    if type(key) == "string" and type(fn) == "function" then
-      local _, owner = issecurevariable(real, key)
+  local found, game, raw = 0, 0, 0
+  for _, e in ipairs(slashEntries()) do
+    local key, fn = e.key, e.fn
+    if e.tbl == SlashCmdList and e.tbl ~= real then raw = raw + 1 end
+    do
+      local _, owner = issecurevariable(e.tbl, key)
       local list = aliases(key)
       if owner and owner ~= ADDON and #list > 0 then
         local target = owner
@@ -538,7 +555,8 @@ local function scanSlash(rows)
       end
     end
   end
-  note("Slash", found .. " addon commands via " .. how .. " table, " .. game .. " game commands skipped")
+  note("Slash", found .. " addon commands via " .. how .. " table, " .. game .. " game commands skipped"
+    .. (raw > 0 and (", " .. raw .. " read from the proxy itself") or ""))
 end
 
 ---------------------------------------------------------------------------

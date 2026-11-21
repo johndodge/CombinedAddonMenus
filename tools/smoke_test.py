@@ -159,7 +159,9 @@ AddonCompartmentFrame = { registeredAddons = {
 local real = {}
 local owners = {}
 SlashCmdList = setmetatable({}, { __index = real, __newindex = function(t, k, v) real[k] = v owners[k] = CURRENT_ADDON end })
+rawowners = {}
 function issecurevariable(t, k)
+  if t == SlashCmdList and rawget(t, k) and rawowners[k] then return false, rawowners[k] end
   if t == real then if owners[k] then return false, owners[k] end return true, nil end
   if type(t) == "table" and rawget(t, "_taint") then return false, t._taint end
   return true, nil
@@ -394,6 +396,11 @@ def main():
         ns.UI.forgetRow(kept[0])
         acts = row_actions("TomTom")
         check("/ttwin" in [acts[j].label for j in range(1, len(acts) + 1)], "Shift-click must show hidden buttons again")
+
+    # Right after a reload the addons' commands can sit in the proxy itself, not behind it
+    lua.execute('rawowners.LATE = "Late Addon" SLASH_LATE1 = "/latecmd" rawset(SlashCmdList, "LATE", function() log("late") end)')
+    acts = row_actions("Late Addon")
+    check("/latecmd" in [acts[j].label for j in range(1, len(acts) + 1)], "commands held in the proxy itself must be found")
 
     # Saved settings got their defaults
     check(ns.db.skin == "classic" and ns.db.button.show is True, "defaults must be filled at load")
