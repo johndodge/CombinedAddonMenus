@@ -652,9 +652,9 @@ function Scan.run(includeBlacklisted)
         else
           a.label = KIND_LABEL[a.kind] or a.detail
         end
-        -- A button that also stands for others shows all their names ("Minimap - /ttwin" with an em dash).
-        -- The dash is written as its UTF-8 bytes (decimal 226 128 148). A pipe looked low in the game font.
-        local DASH = " \226\128\148 "
+        -- A button that also stands for others shows all their names ("Minimap = /ttwin").
+        -- Tried and dropped: "||" (looked low in the game font), "-" (too small), an em dash (fonts lack it).
+        local DASH = " = "
         a.display = (a.sameAs and #a.sameAs > 0) and (a.label .. DASH .. table.concat(a.sameAs, DASH)) or nil
       end
       r.blacklisted = ns.db and ns.db.blacklist and ns.db.blacklist[r.key] and true or false

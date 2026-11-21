@@ -11,7 +11,6 @@ local DIALOG_BG = "Interface\\DialogFrame\\UI-DialogBox-Background"
 local DIALOG_EDGE = "Interface\\DialogFrame\\UI-DialogBox-Border"
 local FRIZ = "Fonts\\FRIZQT__.TTF"
 local ARIALN = "Fonts\\ARIALN.TTF"
-local MORPHEUS = "Fonts\\MORPHEUS.TTF"
 
 local function flat(edge)
   return { bgFile = WHITE, edgeFile = WHITE, edgeSize = edge, insets = { left = edge, right = edge, top = edge, bottom = edge } }
@@ -60,8 +59,8 @@ Skins.list = {
   },
   parchment = {
     name = "Parchment",
-    desc = "Light paper, dark ink and a quest-book font.",
-    font = MORPHEUS, size = 14, titleSize = 18, pad = 10,
+    desc = "Light paper and dark ink, in the game's own sharp font.",
+    font = FRIZ, size = 13, titleSize = 17, pad = 10,
     frame = flat(2),
     frameBg = { 0.92, 0.85, 0.69, 1 }, frameBorder = { 0.36, 0.22, 0.1, 1 },
     title = { 0.36, 0.14, 0.04 }, text = { 0.2, 0.12, 0.05 }, muted = { 0.45, 0.35, 0.25 }, line = { 0.36, 0.22, 0.1, 0.25 },
@@ -82,14 +81,14 @@ Skins.list = {
   },
   frost = {
     name = "Frostglass",
-    desc = "See-through icy blue glass with white text.",
+    desc = "Smoky icy blue glass with white text.",
     font = FRIZ, size = 12, titleSize = 15, pad = 10,
     frame = tipEdge(),
-    frameBg = { 0.45, 0.68, 0.92, 0.3 }, frameBorder = { 0.82, 0.95, 1, 1 },
+    frameBg = { 0.3, 0.5, 0.72, 0.58 }, frameBorder = { 0.82, 0.95, 1, 1 },
     title = { 1, 1, 1 }, text = { 0.9, 0.97, 1 }, muted = { 0.7, 0.82, 0.92 }, line = { 1, 1, 1, 0.15 },
-    button = { backdrop = tipEdge(), bg = { 0.6, 0.8, 1, 0.25 }, border = { 0.85, 0.95, 1, 0.9 },
-               hover = { 0.7, 0.88, 1, 0.5 }, text = { 1, 1, 1 } },
-    input = { backdrop = tipEdge(), bg = { 0.1, 0.2, 0.35, 0.5 }, border = { 0.85, 0.95, 1, 0.9 }, text = { 1, 1, 1 } },
+    button = { backdrop = tipEdge(), bg = { 0.45, 0.66, 0.9, 0.38 }, border = { 0.85, 0.95, 1, 0.9 },
+               hover = { 0.55, 0.78, 1, 0.58 }, text = { 1, 1, 1 } },
+    input = { backdrop = tipEdge(), bg = { 0.06, 0.13, 0.25, 0.7 }, border = { 0.85, 0.95, 1, 0.9 }, text = { 1, 1, 1 } },
   },
 }
 
