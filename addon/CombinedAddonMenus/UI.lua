@@ -443,7 +443,10 @@ local function matches(row, q)
   if q == "" then return true end
   if row.title:lower():find(q, 1, true) then return true end
   for _, a in ipairs(row.actions) do
-    if (a.display or a.label or ""):lower():find(q, 1, true) then return true end
+    if (a.label or ""):lower():find(q, 1, true) then return true end
+    for _, other in ipairs(a.sameAs or {}) do
+      if other:lower():find(q, 1, true) then return true end
+    end
   end
   return false
 end

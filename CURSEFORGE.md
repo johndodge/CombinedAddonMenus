@@ -13,7 +13,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
   - slash commands, sorted under the addon that owns them
 - **Every button works in one click.** Slash command buttons run the command for you. Right-click a button to get that addon's right-click action.
 - **Takes you back to the list.** Close a settings page you opened from the list, and you return to the list, not the game menu. Press Esc in a window you opened from the list, and only that window closes.
-- **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and joins them into one button. The button shows every name, for example `Minimap = /ttwin`, and it tells you in chat when it does this. Shift-click a combined button to split it again, or type `/cam reset` to split all of them.
+- **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and joins them into one button. The button shows every name, for example `Minimap || /ttwin`, and it tells you in chat when it does this. Shift-click a combined button to split it again, or type `/cam reset` to split all of them.
 - **Clean up your minimap.** Hide other addons' minimap icons (any addon that uses LibDBIcon) from the settings page. You can still open those addons from the list.
 - **Blacklist.** Hide addons you never want to see in the list.
 - **Six skins.** Each skin has its own logo. A live preview on the settings page shows each skin before you pick it.
