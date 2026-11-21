@@ -205,6 +205,16 @@ end
 -- Protected game windows are never lent.
 local lent = {}
 
+-- Some windows must be closed through their own code, or the addon is left half-open. X-Perl's options
+-- window is one: its Close button calls XPerl_LockFrames(), which puts the unit frames back to normal.
+-- A plain Hide (what Esc does) skips that, and frames such as target-of-target keep their placeholders
+-- (no health or mana). So when Esc hides a lent window like that, its own close step runs afterwards.
+local CLOSERS = {
+  XPerl_Options = function()
+    if XPerlLocked == 0 and type(XPerl_LockFrames) == "function" then XPerl_LockFrames() end
+  end,
+}
+
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
   local ok, protected = pcall(f.IsProtected, f)
@@ -214,6 +224,12 @@ local function lendEsc(f, name)
   end
   table.insert(UISpecialFrames, name)
   lent[name] = true
+  if CLOSERS[name] and not f.camCloserHooked and type(f.HookScript) == "function" then
+    f.camCloserHooked = true
+    f:HookScript("OnHide", function()
+      if lent[name] then pcall(CLOSERS[name]) end
+    end)
+  end
   return true
 end
 
