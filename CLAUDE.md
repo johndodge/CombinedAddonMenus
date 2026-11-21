@@ -37,7 +37,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (2026-11-21)
 
-- 0.3.0: renamed from Mod Menu Mod (user request, "Everything"). Folder `CombinedAddonMenus`, saved variable `CombinedAddonMenusDB` (copied once from the old `ModMenuModDB`), command `/cam` (`/mmm` still works). The project folder itself is still named `ModMenuMod`. The junction under `D:\World of Warcraft\...\AddOns` must be re-pointed (needs the user's approval). Git repo created 2026-11-21 (`main`, no remote yet).
+- 0.3.0: renamed from Mod Menu Mod (user request, "Everything"). Folder `CombinedAddonMenus`, saved variable `CombinedAddonMenusDB` (copied once from the old `ModMenuModDB`), command `/cam` (`/mmm` still works). The project folder itself is still named `ModMenuMod`. The junction `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` now points to `addon\CombinedAddonMenus` (user approved 2026-11-21; the old `ModMenuMod` link was removed). Git repo (`main`) pushed to the private GitHub repo `johndodge/CombinedAddonMenus`.
 
 - Version 0.2.3. `tools/smoke_test.py` passes against the mock.
 - 0.2.3 (user report: buttons hidden as duplicates when they did different things, often slash commands that show nothing or need a value): duplicate learning is stricter.
