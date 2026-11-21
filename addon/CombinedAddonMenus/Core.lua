@@ -72,6 +72,9 @@ SlashCmdList.COMBINEDADDONMENUS = function(msg)
   elseif msg == "debug" then
     local rows = ns.Scan.run()
     ns.say("scan found " .. #rows .. " addons with at least one button.")
+    local v, late = ns.db and ns.db.view, ns.db and ns.db.late
+    if v then ns.say("The list last showed " .. v.buttons .. " buttons (" .. v.slash .. " slash) at " .. tostring(v.time) .. ".") end
+    if late then ns.say("A second look found " .. late.first .. " -> " .. late.later .. " buttons at " .. tostring(late.time) .. ".") end
     for _, line in ipairs(ns.Scan.report()) do print("  " .. line) end
     -- Saved to the SavedVariables file (written on /reload or logout) so it can be read outside the game.
     local saved = { time = date and date("%Y-%m-%d %H:%M:%S"), report = {}, rows = {} }
@@ -82,6 +85,7 @@ SlashCmdList.COMBINEDADDONMENUS = function(msg)
       saved.rows[#saved.rows + 1] = { title = r.title, key = r.key, buttons = ids }
     end
     if not ns.db then ns.say("Saved settings are not ready, so the report was not saved.") return end
+    saved.view, saved.late = v, late
     ns.db.debug = saved
     ns.say("Report saved. Type /reload so the game writes it to its file.")
   else

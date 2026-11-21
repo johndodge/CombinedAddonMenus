@@ -547,7 +547,8 @@ local function reportNewHidden(list)
   end
 end
 
-function UI.refresh()
+local lastCount = 0
+function UI.refresh(isRetry)
   local ok, result = pcall(ns.Scan.run)
   if ok then
     rows = result
@@ -556,7 +557,25 @@ function UI.refresh()
     rows = {}
     ns.say("The scan stopped with an error: " .. tostring(result))
   end
-  UI.layout()
+  local okL, errL = pcall(UI.layout)
+  if not okL then ns.say("The list stopped drawing with an error: " .. tostring(errL)) end
+  -- Saved for /cam debug: how many buttons the list had, and whether the second look found more.
+  local n, slash = 0, 0
+  for _, r in ipairs(rows) do
+    for _, a in ipairs(r.actions) do
+      n = n + 1
+      if a.kind == "slash" then slash = slash + 1 end
+    end
+  end
+  if ns.db then
+    local t = date and date("%H:%M:%S") or nil
+    if isRetry then
+      if n ~= lastCount then ns.db.late = { first = lastCount, later = n, time = t } end
+    else
+      ns.db.view = { rows = #rows, buttons = n, slash = slash, time = t }
+    end
+  end
+  lastCount = n
 end
 
 ---------------------------------------------------------------------------
@@ -684,7 +703,13 @@ local function create()
   emptyText:SetPoint("TOP", scroll, "TOP", 0, -30)
   emptyText:SetWidth(WIDTH - 80)
 
-  frame:SetScript("OnShow", function() UI.refresh() end)
+  frame:SetScript("OnShow", function()
+    UI.refresh()
+    -- Look once more a moment later, in case something was not ready at the first look.
+    if C_Timer and C_Timer.After then
+      C_Timer.After(1.5, function() if frame and frame:IsShown() then UI.refresh(true) end end)
+    end
+  end)
   UI.applySkin()
 end
 
