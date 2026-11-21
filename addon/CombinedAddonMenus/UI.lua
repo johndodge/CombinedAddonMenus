@@ -81,20 +81,27 @@ local function setEscClosable(on)
   if on then table.insert(UISpecialFrames, FRAME_NAME) end
 end
 
+-- The game can answer with a "secret" value (a hidden answer that addon code may not test).
+-- Testing one is an error, so a secret answer counts as "unknown" and the frame is skipped.
+local function secret(v)
+  return type(issecretvalue) == "function" and issecretvalue(v) and true or false
+end
+
 -- Protected ("forbidden") game windows raise an error if an addon touches them, so skip them.
 local function isShownFrame(f)
   if type(f) ~= "table" or type(f.IsShown) ~= "function" then return false end
   if type(f.IsForbidden) == "function" then
     local ok, forbidden = pcall(f.IsForbidden, f)
-    if not ok or forbidden then return false end
+    if not ok or secret(forbidden) or forbidden then return false end
   end
   local ok, shown = pcall(f.IsShown, f)
-  return ok and shown and true or false
+  if not ok or secret(shown) then return false end
+  return shown and true or false
 end
 
 local function nameOf(f)
   local ok, n = pcall(f.GetName, f)
-  if ok and type(n) == "string" and n ~= "" then return n end
+  if ok and not secret(n) and type(n) == "string" and n ~= "" then return n end
   return nil
 end
 
@@ -153,6 +160,7 @@ end
 local function bigEnough(f)
   local okW, w = pcall(f.GetWidth, f)
   local okH, h = pcall(f.GetHeight, f)
+  if okW and okH and (secret(w) or secret(h)) then return false end
   if okW and okH and type(w) == "number" and type(h) == "number" then
     return w >= 120 and h >= 60
   end
@@ -200,7 +208,7 @@ local lent = {}
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
   local ok, protected = pcall(f.IsProtected, f)
-  if not ok or protected then return false end
+  if not ok or secret(protected) or protected then return false end
   for _, n in ipairs(UISpecialFrames) do
     if n == name then return false end
   end
@@ -361,13 +369,22 @@ function UI.runAction(action, button, mouseButton)
     end
     if learn(action, effect, mouseButton) and frame and frame:IsShown() then UI.refresh() end
   end
+  -- Watching is a convenience. If it ever fails, the click must still work and the user is told once.
+  local told = false
+  local function safeLook(final)
+    local ok, err = pcall(look, final)
+    if not ok and not told then
+      told = true
+      ns.say("Could not watch what that button opened: " .. tostring(err))
+    end
+  end
   -- Some addons build their window a moment after the click, so look again.
   if C_Timer and C_Timer.After then
-    look(false)
-    C_Timer.After(0, function() look(false) end)
-    C_Timer.After(0.3, function() look(true) end)
+    safeLook(false)
+    C_Timer.After(0, function() safeLook(false) end)
+    C_Timer.After(0.3, function() safeLook(true) end)
   else
-    look(true)
+    safeLook(true)
   end
 end
 

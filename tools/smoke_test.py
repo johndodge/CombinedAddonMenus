@@ -358,6 +358,14 @@ def main():
     ns.UI.checkWatch()
     check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"),
           "after the X-Perl window closes, the list must be on the Esc list again")
+    # A frame that answers IsShown with a secret value must be skipped, not tested
+    lua.execute('issecretvalue = function(v) return type(v) == "table" and v.secret == true end '
+                'SecretF = CreateFrame("Frame", "SecretF", UIParent) SecretF:Hide() '
+                'SecretF.IsShown = function(self) if self.flag then return { secret = true } end return false end')
+    lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
+    fake2 = lua.eval('{ id = "Secret", kind = "launcher", label = "Secret", run = function() SecretF.flag = true end }')
+    ns.UI.runAction(fake2, lua.table(), "LeftButton")
+    check(not lua.eval("inEsc('SecretF')"), "a frame with a secret IsShown answer must be skipped")
     ttp = [acts[j] for j in range(1, len(acts) + 1) if acts[j].label == "/ttpaste"][0]
     ns.UI.runAction(ttp, lua.table(), "LeftButton")
     lua.execute("TomTomPaste:Hide()")
