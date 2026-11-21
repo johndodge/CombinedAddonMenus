@@ -634,6 +634,8 @@ function Scan.run(includeBlacklisted)
         else
           a.label = KIND_LABEL[a.kind] or a.detail
         end
+        -- A button that also stands for others shows all their names ("Minimap = /ttwin").
+        a.display = (a.sameAs and #a.sameAs > 0) and (a.label .. " = " .. table.concat(a.sameAs, " = ")) or nil
       end
       r.blacklisted = ns.db and ns.db.blacklist and ns.db.blacklist[r.key] and true or false
       if includeBlacklisted or not r.blacklisted then out[#out + 1] = r end

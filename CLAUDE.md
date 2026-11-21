@@ -37,9 +37,10 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (2026-11-21)
 
+- 0.3.1 (user request): buttons that open the same thing are now ONE button, labelled with all names ("Minimap = /ttwin"; `action.display`). Tooltip lists them; Shift-click splits them. Long labels are cut to the row width.
 - 0.3.0: renamed (user request). Folder `CombinedAddonMenus`, saved variable `CombinedAddonMenusDB` (old settings were not carried over), command `/cam`. The project folder on disk is still named `ModMenuMod`. The junction `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` now points to `addon\CombinedAddonMenus` (user approved 2026-11-21). Git repo (`main`) pushed to the private GitHub repo `johndodge/CombinedAddonMenus`.
 
-- Version 0.2.3. `tools/smoke_test.py` passes against the mock.
+- Version 0.3.1. `tools/smoke_test.py` passes against the mock.
 - 0.2.3 (user report: buttons hidden as duplicates when they did different things, often slash commands that show nothing or need a value): duplicate learning is stricter.
   - Shared windows never count (`SHARED` in UI.lua: StaticPopup, ScriptErrors, BugSack, alerts, toasts, zone text, unit frames...). Guess at the cause: two failing slash commands both showed the same popup.
   - Top-level windows must be at least 120x60. The decision is made once, at the last look (0.3 s), from windows still open; if more than one different window opened, nothing is learned.

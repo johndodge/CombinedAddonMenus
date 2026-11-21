@@ -54,8 +54,9 @@ local function showTooltip(self)
     local opens = UI.describeEffect(a.kind ~= "settings" and ns.db and ns.db.effects and ns.db.effects[a.id])
     if opens then GameTooltip:AddLine("Opens " .. opens .. ".", 0.6, 0.8, 1, true) end
     if a.sameAs and #a.sameAs > 0 then
-      GameTooltip:AddLine("Same as: " .. table.concat(a.sameAs, ", ") .. " (hidden).", 0.6, 0.8, 1, true)
-      GameTooltip:AddLine("Shift-click: show the hidden buttons again.", 0.6, 0.8, 1, true)
+      GameTooltip:AddLine("One button for all of these, because they open the same thing: " .. a.label .. ", "
+        .. table.concat(a.sameAs, ", ") .. ".", 0.6, 0.8, 1, true)
+      GameTooltip:AddLine("Shift-click: split them into separate buttons again.", 0.6, 0.8, 1, true)
     end
     GameTooltip:AddLine("To hide this button, add to Extras.lua: " .. a.id, 0.5, 0.5, 0.5, true)
   elseif self.tipText then
@@ -442,7 +443,7 @@ local function matches(row, q)
   if q == "" then return true end
   if row.title:lower():find(q, 1, true) then return true end
   for _, a in ipairs(row.actions) do
-    if (a.label or ""):lower():find(q, 1, true) then return true end
+    if (a.display or a.label or ""):lower():find(q, 1, true) then return true end
   end
   return false
 end
@@ -472,7 +473,13 @@ function UI.layout()
       local x, line = btnX, 0
       local function place(b)
         ns.Skins.paintButton(b, skin, skin.button)
+        b.label:SetWidth(0)   -- measure the whole text first
         local w = math.max(56, math.floor((b.label:GetStringWidth() or 40) + 18))
+        local maxW = contentW - btnX - 4
+        if w > maxW then
+          w = maxW
+          b.label:SetWidth(w - 10)   -- a very long combined name is cut with "..."
+        end
         b:SetWidth(w)
         if x > btnX and x + w > contentW - 4 then
           x, line = btnX, line + 1
@@ -487,7 +494,7 @@ function UI.layout()
         nBtn = nBtn + 1
         local b = getButton(nBtn)
         b.action = list[i]
-        b:SetLabel(list[i].label or "?")
+        b:SetLabel(list[i].display or list[i].label or "?")
         place(b)
       end
       if limit < #list then
@@ -527,8 +534,8 @@ local function reportNewHidden(list)
         now[k] = true
         if knownHidden and not knownHidden[k] then
           local what = UI.describeEffect(a.effect or (ns.db and ns.db.effects and ns.db.effects[a.id]))
-          news[#news + 1] = r.title .. ": the \"" .. other .. "\" button opens the same thing as \""
-            .. (a.label or "?") .. "\"" .. (what and (" (" .. what .. ")") or "") .. ", so it is hidden now."
+          news[#news + 1] = r.title .. ": \"" .. other .. "\" opens the same thing as \""
+            .. (a.label or "?") .. "\"" .. (what and (" (" .. what .. ")") or "") .. ", so they are one button now."
         end
       end
     end
@@ -536,7 +543,7 @@ local function reportNewHidden(list)
   knownHidden = now
   for _, m in ipairs(news) do ns.say(m) end
   if #news > 0 then
-    ns.say("If that is wrong, Shift-click the button that stayed to show the hidden ones again.")
+    ns.say("If that is wrong, Shift-click the combined button to split them again.")
   end
 end
 

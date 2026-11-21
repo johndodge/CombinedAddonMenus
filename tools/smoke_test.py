@@ -326,7 +326,7 @@ def main():
     labels = [acts[j].label for j in range(1, len(acts) + 1)]
     check(labels == ["Settings", "Minimap", "Paste", "/way", "/ttpaste", "Way"], f"duplicates must be hidden after use: {labels}")
     calls = list(lua.globals().calls.values())
-    check(any('the "/ttwin" button opens the same thing as "Minimap" (the window TomTomWindow), so it is hidden now' in c for c in calls),
+    check(any('"/ttwin" opens the same thing as "Minimap" (the window TomTomWindow), so they are one button now' in c for c in calls),
           "chat must say when a button is hidden as a duplicate")
     # Paste (a window Esc can't close) and /ttpaste open the same window.
     # A right-click must not teach anything; a left-click must.
@@ -350,6 +350,9 @@ def main():
     acts = row_actions("TomTom")
     labels = [acts[j].label for j in range(1, len(acts) + 1)]
     check(labels == ["Settings", "Minimap", "Paste", "/way", "Way"], f"/ttpaste must hide behind Paste: {labels}")
+    disp = {acts[j].label: acts[j].display for j in range(1, len(acts) + 1) if acts[j].display}
+    check(disp.get("Paste") == "Paste = /ttpaste", f"combined button must show all names: {disp}")
+    check(all(acts[j].display is None for j in range(1, len(acts) + 1) if not acts[j].sameAs), "plain buttons need no display text")
     same = sorted(acts[j].sameAs[k] for j in range(1, len(acts) + 1) if acts[j].sameAs for k in range(1, len(acts[j].sameAs) + 1))
     check(same == ["/tomtom", "/ttpaste", "/ttwin"], f"kept buttons must list what they replace: {same}")
     lua.globals().SlashCmdList.COMBINEDADDONMENUS("reset")
