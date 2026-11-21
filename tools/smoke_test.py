@@ -353,7 +353,7 @@ def main():
     labels = [acts[j].label for j in range(1, len(acts) + 1)]
     check(labels == ["Settings", "Minimap", "Paste", "/way", "Way"], f"/ttpaste must hide behind Paste: {labels}")
     disp = {acts[j].label: acts[j].display for j in range(1, len(acts) + 1) if acts[j].display}
-    check(disp.get("Paste") == "Paste - /ttpaste", f"combined button must show all names: {disp}")
+    check(disp.get("Paste") == "Paste "+chr(0x2014)+" /ttpaste", f"combined button must show all names: {disp}")
     check(all(acts[j].display is None for j in range(1, len(acts) + 1) if not acts[j].sameAs), "plain buttons need no display text")
     same = sorted(acts[j].sameAs[k] for j in range(1, len(acts) + 1) if acts[j].sameAs for k in range(1, len(acts[j].sameAs) + 1))
     check(same == ["/tomtom", "/ttpaste", "/ttwin"], f"kept buttons must list what they replace: {same}")
