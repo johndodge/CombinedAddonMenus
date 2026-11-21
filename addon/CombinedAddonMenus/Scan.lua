@@ -653,8 +653,8 @@ function Scan.run(includeBlacklisted)
           a.label = KIND_LABEL[a.kind] or a.detail
         end
         -- A button that also stands for others shows all their names ("Minimap = /ttwin").
-        -- Names are joined with "||". The game reads one "|" as an escape code, so each is written twice.
-        a.display = (a.sameAs and #a.sameAs > 0) and (a.label .. " |||| " .. table.concat(a.sameAs, " |||| ")) or nil
+        -- Names are joined with a dash ("Minimap - /ttwin"). A pipe looked low and odd in the game font.
+        a.display = (a.sameAs and #a.sameAs > 0) and (a.label .. " - " .. table.concat(a.sameAs, " - ")) or nil
       end
       r.blacklisted = ns.db and ns.db.blacklist and ns.db.blacklist[r.key] and true or false
       if includeBlacklisted or not r.blacklisted then out[#out + 1] = r end
