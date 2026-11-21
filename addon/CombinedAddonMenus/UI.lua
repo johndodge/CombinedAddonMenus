@@ -176,6 +176,16 @@ local function topWindows()
     if isShownFrame(f) then
       local n = nameOf(f)
       if n and not ignored(n) then set[f] = n end
+      -- One level deeper too: X-Perl's options window sits under a helper frame (XPerl_OptionsAnchor).
+      local okSub, sub = pcall(function() return { f:GetChildren() } end)
+      if okSub then
+        for _, g in ipairs(sub) do
+          if isShownFrame(g) then
+            local gn = nameOf(g)
+            if gn and not ignored(gn) then set[g] = gn end
+          end
+        end
+      end
     end
   end
   return set

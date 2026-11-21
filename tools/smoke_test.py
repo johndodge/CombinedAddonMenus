@@ -346,6 +346,18 @@ def main():
     check(not lua.eval("inEsc('TomTomPaste')") and lua.eval("inEsc('CombinedAddonMenusFrame')"),
           "after the Paste window closes, it must leave the Esc list and the list must return to it")
     check(ns.db.effects[paste.id] == "window:TomTomPaste", f"Paste must learn its window: {ns.db.effects[paste.id]}")
+    # A window that sits under a helper frame, not directly under UIParent (X-Perl's options window)
+    lua.execute('XPerlAnchor = CreateFrame("Frame", "XPerl_OptionsAnchor", UIParent) XPerlAnchor:Show() '
+                'XPerlOptions = CreateFrame("Frame", "XPerl_Options", XPerlAnchor) XPerlOptions:Hide()')
+    lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
+    fake = lua.eval('{ id = "XPerl Launcher", kind = "launcher", label = "X-Perl", run = function() XPerl_Options:Show() end }')
+    ns.UI.runAction(fake, lua.table(), "LeftButton")
+    check(lua.eval("inEsc('XPerl_Options')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
+          "a window under a helper frame must close on Esc before the list")
+    lua.execute("XPerl_Options:Hide()")
+    ns.UI.checkWatch()
+    check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"),
+          "after the X-Perl window closes, the list must be on the Esc list again")
     ttp = [acts[j] for j in range(1, len(acts) + 1) if acts[j].label == "/ttpaste"][0]
     ns.UI.runAction(ttp, lua.table(), "LeftButton")
     lua.execute("TomTomPaste:Hide()")
