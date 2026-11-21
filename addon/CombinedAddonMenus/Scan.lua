@@ -1,4 +1,4 @@
--- Mod Menu Mod - finds the menus of the other addons.
+-- Combined Addon Menus - finds the menus of the other addons.
 -- Four sources, all read at the moment the list opens:
 --   1. Settings pages (ESC > Options > AddOns)
 --   2. The minimap dropdown (Addon Compartment): .toc AddonCompartmentFunc and runtime entries
@@ -184,7 +184,7 @@ local function addAction(rows, owner, fallbackTitle, action)
   return r
 end
 
-local report = {}   -- what each source found, for /mmm debug
+local report = {}   -- what each source found, for /cam debug
 local function note(source, text) report[#report + 1] = source .. ": " .. text end
 
 ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
-# Mod Menu Mod
+# Combined Addon Menus
 
 **One window for every addon menu you have.**
 
-Some addons hide their options behind a slash command. Others put them on a minimap button, in the minimap dropdown, or deep in Options > AddOns. Mod Menu Mod finds all of them by itself and puts them in one list. Type `/mmm` or click the small **M** button. Each addon gets one button for each way to open it.
+Some addons hide their options behind a slash command. Others put them on a minimap button, in the minimap dropdown, or deep in Options > AddOns. Combined Addon Menus finds all of them by itself and puts them in one list. Type `/cam` or click the small **M** button. Each addon gets one button for each way to open it.
 
 ## Features
 
@@ -13,7 +13,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
   - slash commands, sorted under the addon that owns them
 - **Every button works in one click.** Slash command buttons run the command for you. Right-click a button to get that addon's right-click action.
 - **Takes you back to the list.** Close a settings page you opened from the list, and you return to the list, not the game menu. Press Esc in a window you opened from the list, and only that window closes.
-- **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and keeps just one. It tells you in chat when it hides a button. Shift-click the button that stayed to bring the hidden ones back, or type `/mmm reset` to bring back all of them.
+- **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and keeps just one. It tells you in chat when it hides a button. Shift-click the button that stayed to bring the hidden ones back, or type `/cam reset` to bring back all of them.
 - **Clean up your minimap.** Hide other addons' minimap icons (any addon that uses LibDBIcon) from the settings page. You can still open those addons from the list.
 - **Blacklist.** Hide addons you never want to see in the list.
 - **Six skins.** Each skin has its own logo. A live preview on the settings page shows each skin before you pick it.
@@ -31,11 +31,11 @@ Some addons hide their options behind a slash command. Others put them on a mini
 
 | Command | What it does |
 |---|---|
-| `/mmm` | Opens or closes the list |
-| `/mmm settings` | Opens the settings page |
-| `/mmm button` | Shows or hides the M button |
-| `/mmm reset` | Shows buttons that were hidden as duplicates again |
-| `/mmm debug` | Shows what the scan found in each place |
+| `/cam` | Opens or closes the list |
+| `/cam settings` | Opens the settings page |
+| `/cam button` | Shows or hides the M button |
+| `/cam reset` | Shows buttons that were hidden as duplicates again |
+| `/cam debug` | Shows what the scan found in each place |
 
 ## Missing a menu?
 
@@ -49,4 +49,4 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 
 ## Feedback
 
-Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/mmm debug`.
+Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/cam debug`.

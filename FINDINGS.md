@@ -1,4 +1,4 @@
-# Mod Menu Mod: feasibility findings (2026-11-20)
+# Combined Addon Menus: feasibility findings (2026-11-20)
 
 Goal: one place in game that opens the menu of every other installed addon.
 

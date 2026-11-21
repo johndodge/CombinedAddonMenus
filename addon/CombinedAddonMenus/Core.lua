@@ -1,24 +1,24 @@
--- Mod Menu Mod - slash commands, keybinding, saved settings and start-up.
+-- Combined Addon Menus - slash commands, keybinding, saved settings and start-up.
 
 local ADDON, ns = ...
 
-local PREFIX = "|cff66ccffMod Menu Mod|r: "
+local PREFIX = "|cff66ccffCombined Addon Menus|r: "
 function ns.say(msg) print(PREFIX .. tostring(msg)) end
 
-ns.BROKER_NAME = "ModMenuMod"
+ns.BROKER_NAME = "CombinedAddonMenus"
 
 -- Keybinding names (Key Bindings > AddOns).
-BINDING_HEADER_MODMENUMOD = "Mod Menu Mod"
-BINDING_NAME_MODMENUMOD_TOGGLE = "Open or close the mod list"
+BINDING_HEADER_COMBINEDADDONMENUS = "Combined Addon Menus"
+BINDING_NAME_COMBINEDADDONMENUS_TOGGLE = "Open or close the mod list"
 
 -- Called by the keybinding and by the minimap dropdown entry (.toc AddonCompartmentFunc).
-function ModMenuMod_Toggle() ns.UI.toggle() end
-function ModMenuMod_OnCompartmentClick(_, mouseButton)
+function CombinedAddonMenus_Toggle() ns.UI.toggle() end
+function CombinedAddonMenus_OnCompartmentClick(_, mouseButton)
   if mouseButton == "RightButton" then ns.UI.openOptions() else ns.UI.toggle() end
 end
 
 ---------------------------------------------------------------------------
--- Saved settings (ModMenuModDB, one per account)
+-- Saved settings (CombinedAddonMenusDB, one per account)
 ---------------------------------------------------------------------------
 local DEFAULTS = {
   skin = "classic",
@@ -44,19 +44,20 @@ local function fill(db, defaults)
 end
 
 ---------------------------------------------------------------------------
--- /mmm
+-- /cam
 ---------------------------------------------------------------------------
 local function help()
   ns.say("commands:")
-  print("  /mmm - open or close the list")
-  print("  /mmm settings - open the settings page")
-  print("  /mmm button - show or hide the M button")
-  print("  /mmm reset - show buttons again that were hidden as duplicates")
-  print("  /mmm debug - show what the scan found in each place")
+  print("  /cam - open or close the list")
+  print("  /cam settings - open the settings page")
+  print("  /cam button - show or hide the M button")
+  print("  /cam reset - show buttons again that were hidden as duplicates")
+  print("  /cam debug - show what the scan found in each place")
 end
 
-SLASH_MODMENUMOD1 = "/mmm"
-SlashCmdList.MODMENUMOD = function(msg)
+SLASH_COMBINEDADDONMENUS1 = "/cam"
+SLASH_COMBINEDADDONMENUS2 = "/mmm"   -- the old command still works
+SlashCmdList.COMBINEDADDONMENUS = function(msg)
   msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if msg == "" then
     ns.UI.toggle()
@@ -64,7 +65,7 @@ SlashCmdList.MODMENUMOD = function(msg)
     ns.UI.openOptions()
   elseif msg == "button" or msg == "minimap" then
     ns.Button.setShown(not ns.db.button.show)
-    ns.say(ns.db.button.show and "M button shown." or "M button hidden. Type /mmm button to show it again.")
+    ns.say(ns.db.button.show and "M button shown." or "M button hidden. Type /cam button to show it again.")
   elseif msg == "reset" then
     if ns.db then ns.db.effects = {} end
     ns.say("Forgot which buttons do the same thing. All buttons show again until you use them.")
@@ -97,8 +98,13 @@ events:RegisterEvent("ADDON_LOADED")
 events:RegisterEvent("PLAYER_LOGIN")
 events:SetScript("OnEvent", function(self, event, arg1)
   if event == "ADDON_LOADED" and arg1 == ADDON then
-    ModMenuModDB = type(ModMenuModDB) == "table" and ModMenuModDB or {}
-    ns.db = ModMenuModDB
+    CombinedAddonMenusDB = type(CombinedAddonMenusDB) == "table" and CombinedAddonMenusDB or {}
+    -- The addon was called Mod Menu Mod before 0.3.0. Keep the old settings once.
+    if next(CombinedAddonMenusDB) == nil and type(ModMenuModDB) == "table" then
+      for k, v in pairs(ModMenuModDB) do CombinedAddonMenusDB[k] = v end
+    end
+    ModMenuModDB = nil
+    ns.db = CombinedAddonMenusDB
     ns.db.minimap = nil   -- 0.1.x stored its LibDBIcon gear icon here; replaced by the M button
     fill(ns.db, DEFAULTS)
     -- 0.2.3 made duplicate learning stricter. Matches learned by the older rules can be wrong,

@@ -1,4 +1,4 @@
--- Mod Menu Mod - the small square "M" button. It shows the logo of the current skin
+-- Combined Addon Menus - the small square "M" button. It shows the logo of the current skin
 -- (media\Logo_<skin>.tga, drawn by tools/make_icon.py).
 -- Left-click: open or close the list. Right-click: open the settings page.
 -- Hold Alt and drag to move it. The position is saved. The settings page can hide it.
@@ -28,7 +28,7 @@ local function place()
 end
 
 local function create()
-  btn = CreateFrame("Button", "ModMenuModButton", UIParent)
+  btn = CreateFrame("Button", "CombinedAddonMenusButton", UIParent)
   btn:SetSize(SIZE, SIZE)
   btn:SetFrameStrata("MEDIUM")
   btn:SetClampedToScreen(true)
@@ -69,7 +69,7 @@ local function create()
   end)
   btn:HookScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:AddLine("Mod Menu Mod")
+    GameTooltip:AddLine("Combined Addon Menus")
     GameTooltip:AddLine("Click: open the list of your addons.", 1, 1, 1)
     GameTooltip:AddLine("Right-click: settings.", 1, 1, 1)
     GameTooltip:AddLine("Alt + drag: move this button.", 1, 1, 1)
@@ -80,7 +80,7 @@ local function create()
 end
 
 function Button.logoPath(skinId)
-  return "Interface\\AddOns\\ModMenuMod\\media\\Logo_" .. skinId
+  return "Interface\\AddOns\\CombinedAddonMenus\\media\\Logo_" .. skinId
 end
 
 function Button.applySkin()

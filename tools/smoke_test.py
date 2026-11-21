@@ -1,4 +1,4 @@
-"""Smoke test for Mod Menu Mod: loads the addon in Lua 5.1 against a small mock of the game.
+"""Smoke test for Combined Addon Menus: loads the addon in Lua 5.1 against a small mock of the game.
 
 Run with a Python that has lupa:  python tools/smoke_test.py
 It checks that every file loads, the scan finds each source, the window builds,
@@ -10,7 +10,7 @@ import sys
 from lupa import lua51
 
 HERE = pathlib.Path(__file__).resolve().parent
-ADDON = HERE.parent / "addon" / "ModMenuMod"
+ADDON = HERE.parent / "addon" / "CombinedAddonMenus"
 
 MOCK = r"""
 calls = {}
@@ -89,12 +89,12 @@ local list = {
   { "Lueur", "Lueur" },
   { "ForeverDungeonJournal", "DungeonJournal" },
   { "LateAddon", "Late Addon" },
-  { "ModMenuMod", "Mod Menu Mod" },
+  { "CombinedAddonMenus", "Combined Addon Menus" },
 }
 local metaData = {
   Atlas = { AddonCompartmentFunc = "Atlas_Toggle", IconTexture = "atlas.tga" },
   Lueur = { AddonCompartmentFunc = "Lueur_Missing" },
-  ModMenuMod = { AddonCompartmentFunc = "ModMenuMod_OnCompartmentClick" },
+  CombinedAddonMenus = { AddonCompartmentFunc = "CombinedAddonMenus_OnCompartmentClick" },
 }
 C_AddOns = {
   GetNumAddOns = function() return #list end,
@@ -184,7 +184,7 @@ SLASH_LUEA1 = "/luea" SlashCmdList.LUEA = function() StaticPopup1:Show() end
 SLASH_LUEB1 = "/lueb" SlashCmdList.LUEB = function() StaticPopup1:Show() end
 SLASH_LUEC1 = "/luec" SlashCmdList.LUEC = function() LueurMain:Show() LueurHelp:Show() end
 SLASH_LUED1 = "/lued" SlashCmdList.LUED = function() LueurMain:Show() LueurHelp:Show() end
-CURRENT_ADDON = "ModMenuMod"
+CURRENT_ADDON = "CombinedAddonMenus"
 DEFAULT_CHAT_FRAME = { editBox = newObj() }
 TomTomPaste = CreateFrame("Frame", "TomTomPaste", UIParent)   -- not Esc-closable
 StaticPopup1 = CreateFrame("Frame", "StaticPopup1", UIParent)  -- the game's shared popup
@@ -203,12 +203,12 @@ def main():
     lua = lua51.LuaRuntime(unpack_returned_tuples=True)
     lua.execute(MOCK)
     ns = lua.table()
-    run_file = lua.eval("function(src, name, ns) local f = assert(loadstring(src, '@'..name)) f('ModMenuMod', ns) end")
-    toc = (ADDON / "ModMenuMod.toc").read_text(encoding="utf-8").splitlines()
+    run_file = lua.eval("function(src, name, ns) local f = assert(loadstring(src, '@'..name)) f('CombinedAddonMenus', ns) end")
+    toc = (ADDON / "CombinedAddonMenus.toc").read_text(encoding="utf-8").splitlines()
     files = [l.strip() for l in toc if l.strip().endswith(".lua")]
     for name in files:
         run_file((ADDON / name).read_text(encoding="utf-8"), name, ns)
-    lua.execute("fire('ADDON_LOADED', 'ModMenuMod') fire('PLAYER_LOGIN')")
+    lua.execute("fire('ADDON_LOADED', 'CombinedAddonMenus') fire('PLAYER_LOGIN')")
     # Extra entry and hide entry, as a user would add them
     lua.execute("CURRENT_ADDON = nil")
     lua.eval("""function(ns)
@@ -237,7 +237,7 @@ def main():
             failures.append(msg)
 
     check("Gameplay" not in out, "Blizzard page 'Gameplay' must not show")
-    check("Mod Menu Mod" not in out, "our own addon must not show")
+    check("Combined Addon Menus" not in out, "our own addon must not show")
     check(out.get("Bartender4") == ["Settings", "Dropdown", "/bartender", "/bt", "/bt4"], f"Bartender4 row wrong: {out.get('Bartender4')}")
     check(out.get("<DBM Core>") == ["Minimap", "/dbm"], f"DBM row wrong (hide list should drop /pull): {out.get('<DBM Core>')}")
     check(out.get("DBM GUI") == ["Settings"], f"settings page must use the taint owner: {out.get('DBM GUI')}")
@@ -261,32 +261,32 @@ def main():
     check(any("Lueur_Missing is missing" in c for c in calls), "missing dropdown function must print a message")
 
     # The window, the debug command and the keybinding path
-    lua.globals().ModMenuMod_Toggle()
+    lua.globals().CombinedAddonMenus_Toggle()
     check(ns.UI.isShown(), "window must open")
-    lua.globals().SlashCmdList.MODMENUMOD("debug")
-    lua.globals().SlashCmdList.MODMENUMOD("")
-    check(not ns.UI.isShown(), "/mmm must close the open window")
-    lua.globals().ModMenuMod_OnCompartmentClick()
+    lua.globals().SlashCmdList.COMBINEDADDONMENUS("debug")
+    lua.globals().SlashCmdList.COMBINEDADDONMENUS("")
+    check(not ns.UI.isShown(), "/cam must close the open window")
+    lua.globals().CombinedAddonMenus_OnCompartmentClick()
     check(ns.UI.isShown(), "dropdown entry must open the window")
 
     # Esc: a window opened from the list takes the list off the Esc list until it closes
     lua.execute("TomTomWindow:Hide() TomTomPaste:Hide() SettingsPanel:Hide()")
     check(ns.UI.isShown(), "list must be open before the Esc test")
-    check(lua.eval("inEsc('ModMenuModFrame')"), "list must be on the Esc list at first")
+    check(lua.eval("inEsc('CombinedAddonMenusFrame')"), "list must be on the Esc list at first")
     tt_row = [rows[i] for i in range(1, len(rows) + 1) if rows[i].title == "TomTom"][0]
     tt_minimap = [tt_row.actions[j] for j in range(1, len(tt_row.actions) + 1) if tt_row.actions[j].kind == "minimap"][0]
     ns.UI.runAction(tt_minimap, lua.table(), "LeftButton")
-    check(not lua.eval("inEsc('ModMenuModFrame')"), "list must leave the Esc list while TomTom's window is open")
+    check(not lua.eval("inEsc('CombinedAddonMenusFrame')"), "list must leave the Esc list while TomTom's window is open")
     ns.UI.checkWatch()
-    check(not lua.eval("inEsc('ModMenuModFrame')"), "list must stay off the Esc list while TomTom's window is still open")
+    check(not lua.eval("inEsc('CombinedAddonMenusFrame')"), "list must stay off the Esc list while TomTom's window is still open")
     lua.execute("TomTomWindow:Hide()")
     ns.UI.checkWatch()
-    check(lua.eval("inEsc('ModMenuModFrame')"), "list must return to the Esc list when TomTom's window closes")
+    check(lua.eval("inEsc('CombinedAddonMenusFrame')"), "list must return to the Esc list when TomTom's window closes")
     check(lua.eval("#UISpecialFrames") == 3, "list must be on the Esc list only once")
     # A button that opens no Esc-closable window must not change anything
     dbm_row = [rows[i] for i in range(1, len(rows) + 1) if rows[i].title == "<DBM Core>"][0]
     ns.UI.runAction(dbm_row.actions[1], lua.table(), "LeftButton")
-    check(lua.eval("inEsc('ModMenuModFrame')"), "list must stay on the Esc list when nothing Esc-closable opened")
+    check(lua.eval("inEsc('CombinedAddonMenusFrame')"), "list must stay on the Esc list when nothing Esc-closable opened")
 
     # Settings round trip: list hides, settings closes, game menu pops up, list comes back
     bt_row = [rows[i] for i in range(1, len(rows) + 1) if rows[i].title == "Bartender4"][0]
@@ -334,14 +334,14 @@ def main():
     ns.UI.runAction(paste, lua.table(), "RightButton")
     lua.execute("TomTomPaste:Hide()")
     check(ns.db.effects[paste.id] is None, "a right-click must not teach what a button opens")
-    lua.execute("if not ModMenuModFrame:IsShown() then ModMenuModFrame:Show() end")
+    lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
     ns.UI.runAction(paste, lua.table(), "LeftButton")
     # Esc must close the Paste window first, not the list
-    check(lua.eval("inEsc('TomTomPaste')") and not lua.eval("inEsc('ModMenuModFrame')"),
+    check(lua.eval("inEsc('TomTomPaste')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
           "a window with no Esc support, opened from the list, must close on Esc before the list")
     lua.execute("TomTomPaste:Hide()")
     ns.UI.checkWatch()
-    check(not lua.eval("inEsc('TomTomPaste')") and lua.eval("inEsc('ModMenuModFrame')"),
+    check(not lua.eval("inEsc('TomTomPaste')") and lua.eval("inEsc('CombinedAddonMenusFrame')"),
           "after the Paste window closes, it must leave the Esc list and the list must return to it")
     check(ns.db.effects[paste.id] == "window:TomTomPaste", f"Paste must learn its window: {ns.db.effects[paste.id]}")
     ttp = [acts[j] for j in range(1, len(acts) + 1) if acts[j].label == "/ttpaste"][0]
@@ -352,9 +352,9 @@ def main():
     check(labels == ["Settings", "Minimap", "Paste", "/way", "Way"], f"/ttpaste must hide behind Paste: {labels}")
     same = sorted(acts[j].sameAs[k] for j in range(1, len(acts) + 1) if acts[j].sameAs for k in range(1, len(acts[j].sameAs) + 1))
     check(same == ["/tomtom", "/ttpaste", "/ttwin"], f"kept buttons must list what they replace: {same}")
-    lua.globals().SlashCmdList.MODMENUMOD("reset")
+    lua.globals().SlashCmdList.COMBINEDADDONMENUS("reset")
     acts = row_actions("TomTom")
-    check(len(acts) == len(TT_ALL), "/mmm reset must show all buttons again")
+    check(len(acts) == len(TT_ALL), "/cam reset must show all buttons again")
 
     # A slash command that errors must not break anything
     ns.Scan.runSlashText("/dbmpull")
@@ -403,12 +403,12 @@ def main():
     allt = {allrows[i].title: allrows[i].blacklisted for i in range(1, len(allrows) + 1)}
     check("Atlas" not in shown, "a blacklisted addon must not show in the list")
     check(allt.get("Atlas") is True, "the settings page must still list a blacklisted addon, ticked")
-    check("Mod Menu Mod" not in allt, "our own settings page must not make a row")
+    check("Combined Addon Menus" not in allt, "our own settings page must not make a row")
     ns.db.blacklist[atlas_key] = None
 
     # The M button: exists, left-click toggles the list, right-click opens our settings page
     G = lua.globals()
-    mbtn = G.ModMenuModButton
+    mbtn = G.CombinedAddonMenusButton
     check(mbtn is not None and mbtn.shown, "the M button must exist and show at login")
     if mbtn is not None:
         lua.execute("SettingsPanel:Hide()")
@@ -433,10 +433,10 @@ def main():
         check(ns.db.button.pos is not None, "Alt+drag must save the position")
         ns.Button.resetPosition()
         check(ns.db.button.pos is None, "reset must clear the position")
-        G.SlashCmdList.MODMENUMOD("button")
-        check(not mbtn.shown and ns.db.button.show is False, "/mmm button must hide the M button")
-        G.SlashCmdList.MODMENUMOD("button")
-        check(mbtn.shown, "/mmm button must show it again")
+        G.SlashCmdList.COMBINEDADDONMENUS("button")
+        check(not mbtn.shown and ns.db.button.show is False, "/cam button must hide the M button")
+        G.SlashCmdList.COMBINEDADDONMENUS("button")
+        check(mbtn.shown, "/cam button must show it again")
 
     # The settings page builds, and every skin applies without errors
     panel = G.canvasPanel

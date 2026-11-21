@@ -1,4 +1,4 @@
--- Mod Menu Mod - the list window.
+-- Combined Addon Menus - the list window.
 -- One row per addon: icon, name, then one button per way to open its menu.
 -- The list is scanned again each time the window opens. Every part is painted by the current skin.
 
@@ -10,7 +10,7 @@ local WIDTH, HEIGHT = 640, 500
 local TITLE_W = 170
 local BTN_H, GAP, LINE_H = 20, 4, 24
 local MAX_SHOWN = 8                   -- buttons shown before "+N more"
-local FRAME_NAME = "ModMenuModFrame"
+local FRAME_NAME = "CombinedAddonMenusFrame"
 
 local frame, scroll, content, search, placeholder, emptyText, titleText, hint, closeBtn, optionsBtn
 local contentW = WIDTH - 60
@@ -124,7 +124,7 @@ end
 -- Named windows shown at the top level (children of UIParent), for learning what a
 -- button opens even when Esc can't close that window (TomTom's Paste window).
 local IGNORE = { "Tooltip", "^DropDownList", "^L_DropDownList", "^Lib_DropDownList", "^LibQTip",
-                 "^ModMenuMod", "^GameMenuFrame$", "^ChatFrame", "^Menu" }
+                 "^CombinedAddonMenus", "^GameMenuFrame$", "^ChatFrame", "^Menu" }
 local function ignored(n)
   for _, pat in ipairs(IGNORE) do
     if n:find(pat) then return true end
@@ -265,8 +265,8 @@ end
 
 ---------------------------------------------------------------------------
 -- Learning what each button opens, so buttons that open the same thing show once.
--- Saved per account in ModMenuModDB.effects (action id -> "settings:<id>" or "window:<name>").
--- Only left clicks teach: a right click often opens a different menu. /mmm reset forgets it all.
+-- Saved per account in CombinedAddonMenusDB.effects (action id -> "settings:<id>" or "window:<name>").
+-- Only left clicks teach: a right click often opens a different menu. /cam reset forgets it all.
 ---------------------------------------------------------------------------
 local function learn(action, effect, mouseButton)
   if not effect or not ns.db or action.kind == "settings" or action.kind == "extra" then return false end
@@ -376,7 +376,7 @@ function UI.openOptions()
     return
   end
   UI.runAction({
-    kind = "settings", id = "ModMenuMod Settings", label = "Settings",
+    kind = "settings", id = "CombinedAddonMenus Settings", label = "Settings",
     run = function()
       if InCombatLockdown and InCombatLockdown() then
         ns.say("Settings pages can't open during combat. Try again after combat.")
@@ -507,7 +507,7 @@ function UI.layout()
   end
   content:SetHeight(math.max(y, 1))
   if nRow == 0 then
-    emptyText:SetText(#rows == 0 and "No addon menus found. Type /mmm debug and send the result to the addon author."
+    emptyText:SetText(#rows == 0 and "No addon menus found. Type /cam debug and send the result to the addon author."
       or "No addon matches your search.")
     emptyText:Show()
   else
@@ -632,7 +632,7 @@ local function create()
   frame:HookScript("OnHide", function() UI.checkWatch() end)
 
   titleText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  titleText:SetText("Mod Menu Mod")
+  titleText:SetText("Combined Addon Menus")
 
   closeBtn = makeButton(frame)
   closeBtn:SetSize(22, 20)

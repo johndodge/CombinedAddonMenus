@@ -1,4 +1,4 @@
--- Mod Menu Mod - your own entries.
+-- Combined Addon Menus - your own entries.
 -- This is the only file meant for hand edits. The scan finds most menus by itself.
 -- Use this file for menus the scan misses, and to hide buttons you don't want.
 

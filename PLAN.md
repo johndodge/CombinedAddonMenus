@@ -1,4 +1,4 @@
-# Mod Menu Mod - plan for version 0.2.0 (2026-11-20)
+# Combined Addon Menus - plan for version 0.2.0 (2026-11-20)
 
 The user asked for two fixes and five features. Each item: what, how, test, done when.
 
@@ -25,13 +25,13 @@ The user asked for two fixes and five features. Each item: what, how, test, done
 - **Test:** Smoke test: click, right-click, Alt-drag saves a position, hide/show.
 - **Done when:** The button works in game and remembers its place after `/reload`.
 
-## 4. Settings page (ESC > Options > AddOns > Mod Menu Mod)
+## 4. Settings page (ESC > Options > AddOns > Combined Addon Menus)
 
 - **What:** One page with four sections:
   1. Skin: one button per skin, each drawn in its own skin as a preview.
   2. The M button: show or hide it, and reset its position.
-  3. Minimap icons of other addons: a tick box per icon. Untick to hide it from the minimap. You still reach it through Mod Menu Mod.
-  4. Blacklist: a tick box per addon in the list. Tick to hide that addon from Mod Menu Mod.
+  3. Minimap icons of other addons: a tick box per icon. Untick to hide it from the minimap. You still reach it through Combined Addon Menus.
+  4. Blacklist: a tick box per addon in the list. Tick to hide that addon from Combined Addon Menus.
 - **How:** `Options.lua`, a canvas page registered with `Settings.RegisterCanvasLayoutCategory`. Hidden icons are saved by this addon and applied at login with `LibDBIcon:Hide`. A hook re-hides an icon if its addon shows it again. A `Settings` button in the list window opens this page (with the same return path as other settings pages).
 - **Test:** Smoke test for each section's saved value and its effect.
 - **Done when:** Each setting works in game and survives `/reload`.

@@ -1,0 +1,17 @@
+## Interface: 16001, 120105, 120107
+## Title: Combined Addon Menus
+## Author: Tieme
+## Notes: One list of all your addons, with a button for each way to open their menus. Type /cam.
+## Version: 0.3.0
+## SavedVariables: CombinedAddonMenusDB, ModMenuModDB
+## IconTexture: Interface\AddOns\CombinedAddonMenus\media\Icon
+## AddonCompartmentFunc: CombinedAddonMenus_OnCompartmentClick
+## DefaultState: enabled
+
+Extras.lua
+Skins.lua
+Scan.lua
+UI.lua
+Button.lua
+Options.lua
+Core.lua

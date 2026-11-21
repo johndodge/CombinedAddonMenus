@@ -1,4 +1,4 @@
--- Mod Menu Mod - the settings page (ESC > Options > AddOns > Mod Menu Mod).
+-- Combined Addon Menus - the settings page (ESC > Options > AddOns > Combined Addon Menus).
 -- Four sections: skin, the M button, other addons' minimap icons, and the blacklist.
 -- Also owns hiding other addons' minimap icons (LibDBIcon), which this page controls.
 
@@ -10,7 +10,7 @@ local PAGE_W = 600
 local COL_W = 290
 
 ---------------------------------------------------------------------------
--- Other addons' minimap icons (LibDBIcon). Hidden names are saved in ModMenuModDB.hiddenIcons.
+-- Other addons' minimap icons (LibDBIcon). Hidden names are saved in CombinedAddonMenusDB.hiddenIcons.
 ---------------------------------------------------------------------------
 local function dbicon() return LibStub and LibStub("LibDBIcon-1.0", true) end
 
@@ -179,7 +179,7 @@ local function makePreview()
   f.logo = f:CreateTexture(nil, "ARTWORK")
   f.logo:SetSize(30, 30)
   f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  f.title:SetText("Mod Menu Mod")
+  f.title:SetText("Combined Addon Menus")
   f.search = ns.UI.try("Frame", nil, f, "BackdropTemplate")
   f.search:SetSize(170, 20)
   f.search.text = f.search:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -295,7 +295,7 @@ function Options.build()
   if not panel or not ns.db then return end
   resetPools()
   y = 12
-  text("Mod Menu Mod", "GameFontNormalHuge")
+  text("Combined Addon Menus", "GameFontNormalHuge")
   y = y + 34
 
   header("Skin")
@@ -314,7 +314,7 @@ function Options.build()
   if #names == 0 then
     para("No addon uses the shared minimap icon library (LibDBIcon), so there is nothing to show here.")
   else
-    para("Untick an addon to hide its icon from the minimap. You can still open it from Mod Menu Mod. "
+    para("Untick an addon to hide its icon from the minimap. You can still open it from Combined Addon Menus. "
       .. "Icons marked (hidden by its addon) are switched off in that addon's own settings.")
     local items = {}
     for _, name in ipairs(names) do
@@ -326,7 +326,7 @@ function Options.build()
   end
 
   header("Blacklist")
-  para("Tick an addon to hide it from the Mod Menu Mod list.")
+  para("Tick an addon to hide it from the Combined Addon Menus list.")
   local ok, rows = pcall(ns.Scan.run, true)
   local items = {}
   if ok then
@@ -347,7 +347,7 @@ end
 function Options.register()
   if panel or type(Settings) ~= "table" or type(Settings.RegisterCanvasLayoutCategory) ~= "function" then return end
   panel = CreateFrame("Frame")
-  panel.name = "Mod Menu Mod"
+  panel.name = "Combined Addon Menus"
   scroll = ns.UI.try("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate", "ScrollFrameTemplate")
   scroll:SetPoint("TOPLEFT", 0, -4)
   scroll:SetPoint("BOTTOMRIGHT", -28, 4)
@@ -355,7 +355,7 @@ function Options.register()
   content:SetSize(PAGE_W, 1)
   scroll:SetScrollChild(content)
   panel:SetScript("OnShow", function() Options.build() end)
-  local category = Settings.RegisterCanvasLayoutCategory(panel, "Mod Menu Mod")
+  local category = Settings.RegisterCanvasLayoutCategory(panel, "Combined Addon Menus")
   Settings.RegisterAddOnCategory(category)
   Options.category = category
   Options.categoryID = (type(category.GetID) == "function" and category:GetID()) or category.ID
