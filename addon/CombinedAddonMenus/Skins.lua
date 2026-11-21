@@ -60,7 +60,7 @@ Skins.list = {
   parchment = {
     name = "Parchment",
     desc = "Light paper and dark ink, in the game's own sharp font.",
-    font = FRIZ, size = 13, titleSize = 17, pad = 10,
+    font = FRIZ, size = 13, titleSize = 17, pad = 10, noShadow = true,
     frame = flat(2),
     frameBg = { 0.92, 0.85, 0.69, 1 }, frameBorder = { 0.36, 0.22, 0.1, 1 },
     title = { 0.36, 0.14, 0.04 }, text = { 0.2, 0.12, 0.05 }, muted = { 0.45, 0.35, 0.25 }, line = { 0.36, 0.22, 0.1, 0.25 },
@@ -107,6 +107,16 @@ function Skins.setFont(fs, skin, size)
   local ok = pcall(fs.SetFont, fs, skin.font, size or skin.size, "")
   local f = fs.GetFont and fs:GetFont()
   if not ok or not f then pcall(fs.SetFont, fs, FRIZ, size or skin.size, "") end
+  -- The game's default text has a black shadow. On light paper it looks like blur, so a skin can switch it off.
+  if fs.SetShadowOffset and fs.SetShadowColor then
+    if skin.noShadow then
+      fs:SetShadowOffset(0, 0)
+      fs:SetShadowColor(0, 0, 0, 0)
+    else
+      fs:SetShadowOffset(1, -1)
+      fs:SetShadowColor(0, 0, 0, 1)
+    end
+  end
 end
 
 function Skins.setTextColor(fs, c)
