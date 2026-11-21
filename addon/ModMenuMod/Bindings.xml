@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="MODMENUMOD_TOGGLE" header="MODMENUMOD" category="ADDONS">
+		ModMenuMod_Toggle()
+	</Binding>
+</Bindings>
