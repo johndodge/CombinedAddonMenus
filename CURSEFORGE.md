@@ -53,6 +53,9 @@ Found an addon whose menu doesn't show up? Please report it in the comments. Inc
 
 ## Version history
 
+**0.3.19**
+- New icon for the addon list and the M button. Every skin uses it.
+
 **0.3.18**
 - Press Esc in a window you opened from the list and that window now closes, with its own Close step. For example, X-Perl's options window closes and its move-me frames go away.
 - Fixed a bug where Esc could hide health and mana on other addons' unit frames, and could stop the game menu opening.

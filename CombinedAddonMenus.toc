@@ -2,7 +2,7 @@
 ## Title: Combined Addon Menus
 ## Author: Tieme
 ## Notes: One list of all your addons, with a button for each way to open their menus. Type /cam.
-## Version: 0.3.18
+## Version: 0.3.19
 ## SavedVariables: CombinedAddonMenusDB
 ## IconTexture: Interface\AddOns\CombinedAddonMenus\media\Icon
 ## AddonCompartmentFunc: CombinedAddonMenus_OnCompartmentClick
