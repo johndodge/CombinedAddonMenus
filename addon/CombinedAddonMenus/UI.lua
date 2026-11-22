@@ -223,13 +223,26 @@ end
 -- Protected game windows are never lent.
 local lent = {}
 
+-- A window one level below UIParent (X-Perl's options sit under a helper frame) counts only when it is
+-- large. Preview bars and unit-frame parts are small; options windows are not.
+local function isLargeWindow(f)
+  local okW, w = pcall(f.GetWidth, f)
+  local okH, h = pcall(f.GetHeight, f)
+  if not (okW and okH) or secret(w) or secret(h) then return false end
+  return type(w) == "number" and type(h) == "number" and w >= 350 and h >= 250
+end
+
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
   -- Only real windows: direct children of UIParent, not a shared game frame. Child frames that
   -- an addon shows in bulk (X-Perl's preview health/mana bars) must never reach the Esc list: Esc hid them
   -- and the game menu did not open (found by review 2026-11-21, confirmed by /cam nowatch).
   local okP, parent = pcall(f.GetParent, f)
-  if not okP or parent ~= UIParent then return false end
+  if not okP or secret(parent) or type(parent) ~= "table" then return false end
+  if parent ~= UIParent then
+    local okG, grand = pcall(parent.GetParent, parent)
+    if not (okG and grand == UIParent and isLargeWindow(f)) then return false end
+  end
   if shared(name) then return false end
   local ok, protected = pcall(f.IsProtected, f)
   if not ok or secret(protected) or protected then return false end
@@ -352,12 +365,12 @@ function UI.runAction(action, button, mouseButton)
       end
     end
     local nowShown, newCount = topWindows(), 0
-    for f in pairs(nowShown) do if not topBefore[f] then newCount = newCount + 1 end end
+    for f in pairs(nowShown) do if not topBefore[f] and not isLargeWindow(f) then newCount = newCount + 1 end end
     for f, name in pairs(nowShown) do
       if not topBefore[f] then
         topBefore[f] = name
-        -- More than 3 new frames from one click is a mass show (a preview), not a window: lend none.
-        if listWasShown and newCount <= 3 and lendEsc(f, name) then
+        -- More than 3 new small frames from one click is a mass show (a preview), not a window: lend none of them.
+        if listWasShown and (newCount <= 3 or isLargeWindow(f)) and lendEsc(f, name) then
           found = true
           watching = watching or {}
           watching[f] = true
