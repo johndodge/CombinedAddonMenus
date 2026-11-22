@@ -5,7 +5,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 ## Where things are
 
 - `FINDINGS.md`: what the client supports, proved by in-game probes on 2026-11-20. Read it before changing the scan code.
-- `addon/CombinedAddonMenus/`: the addon itself.
+- **The repo root IS the addon** (changed 2026-11-21 so CurseForge's automatic packaging finds the `.toc` in the root). `.pkgmeta` sets `package-as: CombinedAddonMenus` and ignores `CLAUDE.md`, `CURSEFORGE.md`, `FINDINGS.md`, `PLAN.md`, `tools`, `dist`. Anything new that must not ship goes in the `.pkgmeta` ignore list. Older notes below that say `addon/CombinedAddonMenus/` mean the repo root.
   - `CombinedAddonMenus.toc`: `## Interface: 16001, 120105, 120107` (same as Sprocket Speak).
   - `Scan.lua`: finds the menus. Four sources: Settings pages, Addon Compartment (minimap dropdown), LibDataBroker launchers (minimap buttons), slash commands.
   - `Skins.lua`: six skins (Classic, Gnomish Workshop, Midnight, Parchment, Fel Terminal, Frostglass) and the paint helpers.
@@ -23,7 +23,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 ## Release process (user, 2026-11-21)
 
 1. **While changing or testing:** every change or test build gets a commit and a version bump (0.3.x, `## Version:` in the `.toc`, plus a Status line below). Do not touch the CurseForge description or version history in this stage. Different tries are not release notes.
-2. **When the user says testing passed and the change is fully understood:** push to GitHub, update `CURSEFORGE.md` (description if features changed), add an entry to the **Version history** at the bottom of `CURSEFORGE.md`, rebuild `dist/CombinedAddonMenus-<version>.zip` with forward-slash paths (Python `zipfile`, not `Compress-Archive`), and commit.
+2. **When the user says testing passed and the change is fully understood:** push to GitHub, update `CURSEFORGE.md` (description if features changed), add an entry to the **Version history** at the bottom of `CURSEFORGE.md`, rebuild the zip with `python tools/build_zip.py` (forward-slash paths, honors `.pkgmeta`; never `Compress-Archive`), and commit. If CurseForge's GitHub webhook is set up, push a git tag `v<version>` (a tag containing `alpha` or `beta` makes that release type; any other tag is a release) after the user confirms.
 3. Version history lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a history entry for a build that is still being tried.
 4. Ask the user if unsure whether testing has passed.
 
@@ -95,5 +95,5 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - First in-game scan (0.1.0, 2026-11-20): 22 addon settings pages (via `SettingsPanel:GetAllCategories`, 22 game pages skipped), 11 .toc dropdown entries, 22 minimap launchers, 5 runtime dropdown entries, 92 addon slash commands. 45 rows.
   - Bug found and fixed in 0.1.1: Ace3 short commands (`/bt`, `/bt4`, `/dcr`, `/spq`) landed under Atlas (the AceConsole host). Now matched by abbreviation. Slash buttons now sort best fit first.
   - Bartender4 shows no Settings button. Cause not checked.
-- **Linked into the game** (user approved 2026-11-20): `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` is a junction to `addon\CombinedAddonMenus`. Anything else under `D:\World of Warcraft\` still needs a new ask. To unlink, use `cmd /c rmdir "<link>"` with no `/s`. NEVER use PowerShell `rmdir` or `Remove-Item -Recurse` on a junction.
+- **Linked into the game** (user approved 2026-11-20): `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` is a junction to the project root `C:\Users\paint\claudeprojects\Games\WorldOfWarcraftMods\ModMenuMod` (re-pointed 2026-11-21 with the user's approval; the game also sees the non-addon files, which it ignores). Anything else under `D:\World of Warcraft\` still needs a new ask. To unlink, use `cmd /c rmdir "<link>"` with no `/s`. NEVER use PowerShell `rmdir` or `Remove-Item -Recurse` on a junction.
 - Not built: loose minimap buttons that don't use LibDataBroker (MinimapButtonButton already gathers those).
