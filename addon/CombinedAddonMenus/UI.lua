@@ -205,18 +205,15 @@ end
 -- Protected game windows are never lent.
 local lent = {}
 
--- Some windows must be closed through their own code, or the addon is left half-open. X-Perl's options
--- window is one: its Close button calls XPerl_LockFrames(), which puts the unit frames back to normal.
--- A plain Hide (what Esc does) skips that, and frames such as target-of-target keep their placeholders
--- (no health or mana). So when Esc hides a lent window like that, its own close step runs afterwards.
-local CLOSERS = {
-  XPerl_Options = function()
-    if XPerlLocked == 0 and type(XPerl_LockFrames) == "function" then XPerl_LockFrames() end
-  end,
-}
+-- Windows that Esc must never close. X-Perl's options window: when Esc closed it (we had lent it to the Esc
+-- list), the user's target and target-of-target frames lost their health and mana until a reload. Closing it
+-- with its own X button was fine. Even running its own close step after Esc did not help (0.3.12), so it is
+-- left alone. The list still steps aside while it is open, so Esc does nothing until it is closed with its X.
+local NO_LEND = { XPerl_Options = true }
 
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
+  if NO_LEND[name] then return true end
   local ok, protected = pcall(f.IsProtected, f)
   if not ok or secret(protected) or protected then return false end
   for _, n in ipairs(UISpecialFrames) do
@@ -224,12 +221,6 @@ local function lendEsc(f, name)
   end
   table.insert(UISpecialFrames, name)
   lent[name] = true
-  if CLOSERS[name] and not f.camCloserHooked and type(f.HookScript) == "function" then
-    f.camCloserHooked = true
-    f:HookScript("OnHide", function()
-      if lent[name] then pcall(CLOSERS[name]) end
-    end)
-  end
   return true
 end
 

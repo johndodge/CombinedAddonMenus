@@ -353,13 +353,13 @@ def main():
     lua.execute('XPerlLocked = 0 function XPerl_LockFrames() XPerlLocked = 1 log("xperl lock") end')
     fake = lua.eval('{ id = "XPerl Launcher", kind = "launcher", label = "X-Perl", run = function() XPerl_Options:Show() end }')
     ns.UI.runAction(fake, lua.table(), "LeftButton")
-    check(lua.eval("inEsc('XPerl_Options')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
-          "a window under a helper frame must close on Esc before the list")
+    check(not lua.eval("inEsc('XPerl_Options')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
+          "X-Perl's window must never be lent to Esc, and the list must step aside while it is open")
     lua.execute("XPerl_Options:Hide()")   # what Esc does
-    check(lua.eval("XPerlLocked") == 1, "hiding X-Perl's window with Esc must also run its own close step (XPerl_LockFrames)")
     ns.UI.checkWatch()
     check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"),
           "after the X-Perl window closes, the list must be on the Esc list again")
+    check(lua.eval("XPerlLocked") == 0, "the addon must never run X-Perl's own functions")
     # A frame that answers IsShown with a secret value must be skipped, not tested
     lua.execute('issecretvalue = function(v) return type(v) == "table" and v.secret == true end '
                 'SecretF = CreateFrame("Frame", "SecretF", UIParent) SecretF:Hide() '
