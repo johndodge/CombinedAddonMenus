@@ -48,7 +48,7 @@ local function newObj(name)
       local fs = newObj() fs.needsFont = true fs.font = template return fs
     end,
     GetPoint = function(self) return "CENTER", nil, "CENTER", 0, 0 end,
-    Click = function(self, b) if self.scripts.OnClick then self.scripts.OnClick(self, b or "LeftButton") end end,
+    Click = function(self, b) if self.scripts.PreClick then self.scripts.PreClick(self, b or "LeftButton") end if self.scripts.OnClick then self.scripts.OnClick(self, b or "LeftButton") end end,
     GetName = function(self) return self.name end,
     GetParent = function(self) return self.parentFrame end,
     SetSize = function(self, w, h) self.w, self.h = w, h end,
@@ -358,7 +358,9 @@ def main():
     # Entries other addons added after ours must never be moved (moving them taints them for the game's Esc code)
     lua.execute('table.insert(UISpecialFrames, "ZZLateWindow")')
     late_idx = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
-    lua.execute('XPerlLocked = 0 function XPerl_LockFrames() XPerlLocked = 1 log("xperl lock") end')
+    lua.execute('XPerlLocked = 0 LOCKCOUNT = 0 function XPerl_LockFrames() XPerlLocked = 1 LOCKCOUNT = LOCKCOUNT + 1 end '
+                'XPerlClose = CreateFrame("Button", "XPerl_Options_CloseButton", XPerlOptions) '
+                'XPerlClose:SetScript("OnClick", function() XPerl_LockFrames() XPerl_Options:Hide() end)')
     fake = lua.eval('{ id = "XPerl Launcher", kind = "launcher", label = "X-Perl", run = function() XPerl_Options:Show() end }')
     ns.UI.runAction(fake, lua.table(), "LeftButton")
     check(lua.eval("inEsc('XPerl_Options')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
@@ -367,7 +369,7 @@ def main():
     ns.UI.checkWatch()
     check(not lua.eval("inEsc('XPerl_Options')") and lua.eval("inEsc('CombinedAddonMenusFrame')"),
           "after the helper-frame window closes it must leave the Esc list and the list must return")
-    check(lua.eval("XPerlLocked") == 0, "the addon must never run X-Perl's own functions")
+    check(lua.eval("LOCKCOUNT") == 1, f"Esc hiding a lent window must run its Close button script once: {lua.eval('LOCKCOUNT')}")
     late_idx2 = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
     check(late_idx == late_idx2, f"the list must never move other windows in UISpecialFrames: {late_idx} -> {late_idx2}")
     # A click that shows many child frames at once (X-Perl's preview of its unit frames) must lend none of them
@@ -382,6 +384,14 @@ def main():
     lua.execute("XPerl_Options:Hide() PV:Hide() for i = 1, 6 do PVK[i]:Hide() end")
     ns.UI.checkWatch()
     check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"), "after it closes, the list is back on the Esc list")
+    # Closing a lent window with its own Close button must not run the Close script a second time
+    lua.execute("XPerl_Options:Hide() LOCKCOUNT = 0 XPerlLocked = 0")
+    ns.UI.checkWatch()
+    lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
+    ns.UI.runAction(fake, lua.table(), "LeftButton")
+    lua.execute("XPerlClose:Click()")
+    check(lua.eval("LOCKCOUNT") == 1, f"its own Close button must run its script exactly once: {lua.eval('LOCKCOUNT')}")
+    ns.UI.checkWatch()
     # A frame that answers IsShown with a secret value must be skipped, not tested
     lua.execute('issecretvalue = function(v) return type(v) == "table" and v.secret == true end '
                 'SecretF = CreateFrame("Frame", "SecretF", UIParent) SecretF:Hide() '

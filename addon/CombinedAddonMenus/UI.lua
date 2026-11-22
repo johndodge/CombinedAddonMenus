@@ -232,6 +232,34 @@ local function isLargeWindow(f)
   return type(w) == "number" and type(h) == "number" and w >= 350 and h >= 250
 end
 
+-- Esc hides a window with a plain Hide. Many windows do cleanup in their Close button instead (X-Perl's
+-- Close button puts its unit frames back to normal; a plain Hide leaves its move-me preview frames on
+-- screen). So when Esc hides a lent window, that window's own Close button script runs once afterwards.
+-- If the Close button itself closed the window, it is not run a second time.
+local function closeButtonOf(f, name)
+  local a, b, c = f.CloseButton, _G[name .. "_CloseButton"], _G[name .. "CloseButton"]
+  for _, btn in pairs({ a = a, b = b, c = c }) do
+    if type(btn) == "table" and type(btn.GetScript) == "function" then return btn end
+  end
+end
+
+local function hookCloseButton(f, name)
+  if f.camCloseHooked or type(f.HookScript) ~= "function" then return end
+  local b = closeButtonOf(f, name)
+  if not b or type(b.HookScript) ~= "function" then return end
+  f.camCloseHooked = true
+  b:HookScript("PreClick", function() f.camClosedByButton = true end)
+  f:HookScript("OnHide", function()
+    if not lent[name] then return end
+    if f.camClosedByButton then f.camClosedByButton = nil return end
+
+    C_Timer.After(0, function()
+      local fn = b:GetScript("OnClick")
+      if type(fn) == "function" then pcall(fn, b, "LeftButton") end
+    end)
+  end)
+end
+
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
   -- Only real windows: direct children of UIParent, not a shared game frame. Child frames that
@@ -251,6 +279,7 @@ local function lendEsc(f, name)
   end
   claimSlot(name)
   lent[name] = true
+  hookCloseButton(f, name)
   return true
 end
 
