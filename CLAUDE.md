@@ -6,29 +6,48 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 - `FINDINGS.md`: what the client supports, proved by in-game probes on 2026-11-20. Read it before changing the scan code.
 - **The repo root IS the addon** (changed 2026-11-21 so CurseForge's automatic packaging finds the `.toc` in the root). `.pkgmeta` sets `package-as: CombinedAddonMenus` and ignores `CLAUDE.md`, `CURSEFORGE.md`, `FINDINGS.md`, `PLAN.md`, `tools`, `dist`. Anything new that must not ship goes in the `.pkgmeta` ignore list. Older notes below that say `addon/CombinedAddonMenus/` mean the repo root.
-  - `CombinedAddonMenus.toc`: `## Interface: 16001, 120105, 120107` (same as Sprocket Speak).
+  - `CombinedAddonMenus.toc`: `## Interface: 16001` only (WoW Forever = 1.60.1). Changed 2026-11-22: CurseForge copies this line into the file's game versions, and the user wants Forever only for now. Retail numbers (12.1.5 = 120105, 12.1.7 = 120107) can be added back later.
   - `Scan.lua`: finds the menus. Four sources: Settings pages, Addon Compartment (minimap dropdown), LibDataBroker launchers (minimap buttons), slash commands.
   - `Skins.lua`: six skins (Classic, Gnomish Workshop, Midnight, Parchment, Fel Terminal, Frostglass) and the paint helpers.
   - `UI.lua`: the list window (custom BackdropTemplate frame, painted by the skin).
-  - `Button.lua`: the small square "M" button. Click = list, right-click = settings page, Alt+drag = move.
-  - `Options.lua`: the settings page (ESC > Options > AddOns > Combined Addon Menus): skin, M button, other addons' minimap icons, blacklist.
+  - `Button.lua`: the small square menu button (called the "M button" before 0.3.20; the picture is no longer an M). Click = list, right-click = settings page, Alt+drag = move.
+  - `Options.lua`: the settings page (ESC > Options > AddOns > Combined Addon Menus): skin, menu button, other addons' minimap icons, blacklist.
   - `Core.lua`: `/cam` (user dropped `/mods` 2026-11-20 as too generic), keybinding, saved settings defaults, start-up.
-  - `media/Icon.tga`: 64x64 gold "M" icon, made by `tools/make_icon.py`.
+  - `media/Icon.tga` (64x64) and `media/Logo_*.tga` (128x128): since 0.3.19 all seven are the user's own picture (from `Pictures/Untitled.png`, 80x82, padded to square). `tools/make_icon.py` still makes the old gold M: do NOT rerun it, it overwrites them.
   - `Extras.lua`: the user's own hand-made entries and hide list. The only file meant for hand edits per user.
   - `Bindings.xml`: one keybinding under Key Bindings > AddOns.
 - `PLAN.md`: the 0.2.0 plan (fixes, skins, M button, settings page).
 - `tools/smoke_test.py`: runs the addon in Lua 5.1 (lupa) against a small mock of the game. Needs a venv with `lupa` (`python -m venv X; X/Scripts/python -m pip install lupa`).
 - WoW Forever is at `D:\World of Warcraft\_forever_`. Don't create or change anything under `D:\World of Warcraft\` without asking.
 
-## Release process (user, 2026-11-21)
+## Release process (user, 2026-11-21; updated 2026-11-22)
 
 1. **While changing or testing:** every change or test build gets a commit and a version bump (0.3.x, `## Version:` in the `.toc`, plus a Status line below). Do not touch the CurseForge description or version history in this stage. Different tries are not release notes.
-2. **When the user says testing passed and the change is fully understood:** push to GitHub, update `CURSEFORGE.md` (description if features changed), add an entry to the **Version history** at the bottom of `CURSEFORGE.md`, rebuild the zip with `python tools/build_zip.py` (forward-slash paths, honors `.pkgmeta`; never `Compress-Archive`), and commit. If CurseForge's GitHub webhook is set up, push a git tag `v<version>` (a tag containing `alpha` or `beta` makes that release type; any other tag is a release) after the user confirms.
-3. Version history lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a history entry for a build that is still being tried.
-4. Ask the user if unsure whether testing has passed.
+2. **Always copy changes to the local game copy.** The game folder is a junction to this project root, so edits are live in game after `/reload`. Standing permission from the user (2026-11-22): no need to ask each time. Do NOT push to GitHub or tag until the user says testing passed.
+3. **When the user says testing passed and the change is fully understood:** push to GitHub, update `CURSEFORGE.md` (description if features changed), add an entry to the **Version history** at the top of that section in `CURSEFORGE.md`, rebuild the zip with `python tools/build_zip.py` (forward-slash paths, honors `.pkgmeta`; never `Compress-Archive`; zip is for manual upload only, `dist` is not in git), and commit. Then push the tag (see below) after the user says to.
+4. Version history lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a history entry for a build that is still being tried.
+5. Ask the user if unsure whether testing has passed.
 
-## Decisions (user, 2026-11-20)
+### Tag format (user chose option A, 2026-11-22)
 
+- Tag name: `CombinedAddonMenus-<version>-beta`, for example `CombinedAddonMenus-0.3.23-beta`. CurseForge copies the tag name into the file's display name, so this matches the old manual names (`CombinedAddonMenus-0.3.18.zip`). Not yet checked on CurseForge: the first tag in this format shows whether it works.
+- A tag containing `beta` makes a beta file, `alpha` an alpha file, anything else a release. Keep `-beta` until the user wants a full release.
+- Tags `v0.3.18-beta` to `v0.3.22-beta` used the old `v` format and show as `v0.3.22-beta` on CurseForge. They stay as they are.
+- Commit, then `git push`, then `git tag <name>`, then `git push origin <name>`. The tag push is what CurseForge builds from.
+
+### CurseForge automatic packaging: how it is set up and what went wrong (2026-11-22)
+
+- CurseForge project number `1820321`; author page `https://authors.curseforge.com/#/projects/1820321`. Class Addons, category Plugins (game World of Warcraft). Only WoW addons get automatic builds.
+- GitHub repo `johndodge/CombinedAddonMenus` is **public** (older notes saying private are wrong). Its webhook posts push events (tags included) to `https://www.curseforge.com/api/projects/1820321/package?token=<token>`. The token is stored only in the GitHub webhook; never write it in a file or chat.
+- **Cause of "nothing reaches CurseForge" (v0.3.18 to v0.3.20):** the CurseForge project had no Source (repository) set. Its log said "No Source information found for the project". The GitHub side always returned 200 OK, so the webhook looked healthy. Fix: the user set the Source in the author console. The next tag (0.3.21) built.
+- **Where to look when a push makes no file:** the project's log in the author console (shows "No Source information", "Unhandled error"). GitHub's webhook "Recent deliveries" only shows that CurseForge accepted the message, not whether a build worked.
+- To start a build by hand without a new tag: `curl -X POST -d '' "<webhook url>"` (the URL with token is in the GitHub webhook config; `gh api repos/johndodge/CombinedAddonMenus/hooks` shows it). `{"success":true}` means accepted, not built.
+
+## Decisions (user, 2026-11-20 and 2026-11-22)
+
+- 2026-11-22: the small square button is the "menu button" in all player text, because its picture is no longer an M. The saved setting key `button` keeps its name so saved positions survive.
+- 2026-11-22: game versions are WoW Forever only (`## Interface: 16001`).
+- 2026-11-22: releases are beta tags in the format above.
 - Published on CurseForge under the **MIT** license, author **Tieme** (`addon/CombinedAddonMenus/LICENSE.txt`, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`.
 
 - Name: **Combined Addon Menus** (folder `CombinedAddonMenus`).
