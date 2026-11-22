@@ -22,7 +22,7 @@ end
 ---------------------------------------------------------------------------
 local DEFAULTS = {
   skin = "classic",
-  button = { show = true },   -- the M button; pos is set when the user moves it
+  button = { show = true },   -- the menu button; pos is set when the user moves it
   hiddenIcons = {},           -- other addons' minimap icons the user hid (LibDBIcon names)
   blacklist = {},             -- rows (addon keys) hidden from the list
   effects = {},               -- what each button opens, learned on click (duplicate hiding)
@@ -50,7 +50,7 @@ local function help()
   ns.say("commands:")
   print("  /cam - open or close the list")
   print("  /cam settings - open the settings page")
-  print("  /cam button - show or hide the M button")
+  print("  /cam button - show or hide the menu button")
   print("  /cam reset - show buttons again that were hidden as duplicates")
   print("  /cam debug - show what the scan found in each place")
 end
@@ -64,7 +64,7 @@ SlashCmdList.COMBINEDADDONMENUS = function(msg)
     ns.UI.openOptions()
   elseif msg == "button" or msg == "minimap" then
     ns.Button.setShown(not ns.db.button.show)
-    ns.say(ns.db.button.show and "M button shown." or "M button hidden. Type /cam button to show it again.")
+    ns.say(ns.db.button.show and "Menu button shown." or "Menu button hidden. Type /cam button to show it again.")
   elseif msg == "reset" then
     if ns.db then ns.db.effects = {} end
     ns.say("Forgot which buttons do the same thing. All buttons show again until you use them.")
@@ -103,7 +103,7 @@ events:SetScript("OnEvent", function(self, event, arg1)
   if event == "ADDON_LOADED" and arg1 == ADDON then
     CombinedAddonMenusDB = type(CombinedAddonMenusDB) == "table" and CombinedAddonMenusDB or {}
     ns.db = CombinedAddonMenusDB
-    ns.db.minimap = nil   -- 0.1.x stored its LibDBIcon gear icon here; replaced by the M button
+    ns.db.minimap = nil   -- 0.1.x stored its LibDBIcon gear icon here; replaced by the menu button
     fill(ns.db, DEFAULTS)
     -- 0.2.3 made duplicate learning stricter. Matches learned by the older rules can be wrong,
     -- so they are cleared once.
@@ -119,7 +119,7 @@ events:SetScript("OnEvent", function(self, event, arg1)
       fill(ns.db, DEFAULTS)
     end
     local ok, err = pcall(ns.Button.update)
-    if not ok then ns.say("The M button could not be made: " .. tostring(err)) end
+    if not ok then ns.say("The menu button could not be made: " .. tostring(err)) end
     pcall(ns.Options.hookIcons)
     pcall(ns.Options.applyIconHiding)
     -- Some addons make their minimap icon a little after login.

@@ -1,4 +1,4 @@
--- Combined Addon Menus - the small square "M" button. It shows the logo of the current skin
+-- Combined Addon Menus - the small square menu button. It shows the logo of the current skin
 -- (media\Logo_<skin>.tga, drawn by tools/make_icon.py).
 -- Left-click: open or close the list. Right-click: open the settings page.
 -- Hold Alt and drag to move it. The position is saved. The settings page can hide it.

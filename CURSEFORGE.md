@@ -2,7 +2,7 @@
 
 **One window for every addon menu you have.**
 
-Some addons hide their options behind a slash command. Others put them on a minimap button, in the minimap dropdown, or deep in Options > AddOns. Combined Addon Menus finds all of them by itself and puts them in one list. Type `/cam` or click the small **M** button. Each addon gets one button for each way to open it.
+Some addons hide their options behind a slash command. Others put them on a minimap button, in the minimap dropdown, or deep in Options > AddOns. Combined Addon Menus finds all of them by itself and puts them in one list. Type `/cam` or click the small **menu** button. Each addon gets one button for each way to open it.
 
 ## Features
 
@@ -23,7 +23,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
   - **Parchment:** light paper, dark ink, the game's sharp serif font
   - **Fel Terminal:** black screen with neon green text
   - **Frostglass:** smoky icy blue glass
-- **Small M button.** Click it to open the list. Right-click it to open the settings. Hold **Alt** and drag it to move it. You can hide it from the settings page.
+- **Small menu button.** Click it to open the list. Right-click it to open the settings. Hold **Alt** and drag it to move it. You can hide it from the settings page.
 - **Search box** to filter the list by addon name or button name.
 - **Keybinding** under Key Bindings > AddOns.
 
@@ -33,7 +33,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
 |---|---|
 | `/cam` | Opens or closes the list |
 | `/cam settings` | Opens the settings page |
-| `/cam button` | Shows or hides the M button |
+| `/cam button` | Shows or hides the menu button |
 | `/cam reset` | Splits combined buttons into separate buttons again |
 | `/cam debug` | Shows what the scan found in each place |
 

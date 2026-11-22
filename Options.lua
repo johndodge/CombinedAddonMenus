@@ -1,5 +1,5 @@
 -- Combined Addon Menus - the settings page (ESC > Options > AddOns > Combined Addon Menus).
--- Four sections: skin, the M button, other addons' minimap icons, and the blacklist.
+-- Four sections: skin, the menu button, other addons' minimap icons, and the blacklist.
 -- Also owns hiding other addons' minimap icons (LibDBIcon), which this page controls.
 
 local ADDON, ns = ...
@@ -302,8 +302,8 @@ function Options.build()
   para("Click a skin to use it. It changes at once. Point at a skin to see it in the preview below.")
   skinGrid()
 
-  header("The M button")
-  check("Show the M button", ns.db.button.show, function(on) ns.Button.setShown(on) end)
+  header("The menu button")
+  check("Show the menu button", ns.db.button.show, function(on) ns.Button.setShown(on) end)
   y = y + 30
   para("Click it to open the list. Right-click it to open this page. Hold Alt and drag it to move it.")
   plainButton("Reset its position", function() ns.Button.resetPosition() end)

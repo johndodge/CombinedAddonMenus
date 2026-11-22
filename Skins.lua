@@ -1,4 +1,4 @@
--- Combined Addon Menus - skins for the list window and the M button.
+-- Combined Addon Menus - skins for the list window and the menu button.
 -- A skin is only data: backdrops, colors and a font. Skins.apply* functions paint frames with it.
 
 local ADDON, ns = ...

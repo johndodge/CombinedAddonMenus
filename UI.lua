@@ -774,7 +774,7 @@ local function create()
 
   optionsBtn = makeButton(frame)
   optionsBtn:SetLabel("Settings")
-  optionsBtn.tipText = "Skins, the M button, other addons' minimap icons, and the blacklist."
+  optionsBtn.tipText = "Skins, the menu button, other addons' minimap icons, and the blacklist."
   optionsBtn:HookScript("OnEnter", showTooltip)
   optionsBtn:HookScript("OnLeave", function() GameTooltip:Hide() end)
   optionsBtn:SetScript("OnClick", function() UI.openOptions() end)
