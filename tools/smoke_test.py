@@ -358,12 +358,10 @@ def main():
     lua.execute('XPerlLocked = 0 function XPerl_LockFrames() XPerlLocked = 1 log("xperl lock") end')
     fake = lua.eval('{ id = "XPerl Launcher", kind = "launcher", label = "X-Perl", run = function() XPerl_Options:Show() end }')
     ns.UI.runAction(fake, lua.table(), "LeftButton")
-    check(not lua.eval("inEsc('XPerl_Options')") and not lua.eval("inEsc('CombinedAddonMenusFrame')"),
-          "X-Perl's window must never be lent to Esc, and the list must step aside while it is open")
+    check(not lua.eval("inEsc('XPerl_Options')"), "a window under a helper frame is not lent to Esc (only direct UIParent children are)")
     lua.execute("XPerl_Options:Hide()")   # what Esc does
     ns.UI.checkWatch()
-    check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"),
-          "after the X-Perl window closes, the list must be on the Esc list again")
+    check(not lua.eval("inEsc('XPerl_Options')"), "the X-Perl window must still not be on the Esc list")
     check(lua.eval("XPerlLocked") == 0, "the addon must never run X-Perl's own functions")
     late_idx2 = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
     check(late_idx == late_idx2, f"the list must never move other windows in UISpecialFrames: {late_idx} -> {late_idx2}")

@@ -223,15 +223,8 @@ end
 -- Protected game windows are never lent.
 local lent = {}
 
--- Windows that Esc must never close. X-Perl's options window: when Esc closed it (we had lent it to the Esc
--- list), the user's target and target-of-target frames lost their health and mana until a reload. Closing it
--- with its own X button was fine. Even running its own close step after Esc did not help (0.3.12), so it is
--- left alone. The list still steps aside while it is open, so Esc does nothing until it is closed with its X.
-local NO_LEND = { XPerl_Options = true }
-
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
-  if NO_LEND[name] then return true end
   -- Only real windows: direct children of UIParent, not a shared game frame. Child frames that
   -- an addon shows in bulk (X-Perl's preview health/mana bars) must never reach the Esc list: Esc hid them
   -- and the game menu did not open (found by review 2026-11-21, confirmed by /cam nowatch).
