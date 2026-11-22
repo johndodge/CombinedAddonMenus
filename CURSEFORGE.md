@@ -53,6 +53,9 @@ Found an addon whose menu doesn't show up? Please report it in the comments. Inc
 
 ## Version history
 
+**0.3.20**
+- The small square button is now called the menu button, because its new picture is not an M.
+
 **0.3.19**
 - New icon for the addon list and the M button. Every skin uses it.
 
