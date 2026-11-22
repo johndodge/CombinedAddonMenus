@@ -350,6 +350,9 @@ def main():
     lua.execute('XPerlAnchor = CreateFrame("Frame", "XPerl_OptionsAnchor", UIParent) XPerlAnchor:Show() '
                 'XPerlOptions = CreateFrame("Frame", "XPerl_Options", XPerlAnchor) XPerlOptions:Hide()')
     lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
+    # Entries other addons added after ours must never be moved (moving them taints them for the game's Esc code)
+    lua.execute('table.insert(UISpecialFrames, "ZZLateWindow")')
+    late_idx = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
     lua.execute('XPerlLocked = 0 function XPerl_LockFrames() XPerlLocked = 1 log("xperl lock") end')
     fake = lua.eval('{ id = "XPerl Launcher", kind = "launcher", label = "X-Perl", run = function() XPerl_Options:Show() end }')
     ns.UI.runAction(fake, lua.table(), "LeftButton")
@@ -360,6 +363,8 @@ def main():
     check(lua.eval("inEsc('CombinedAddonMenusFrame')") and not lua.eval("inEsc('XPerl_Options')"),
           "after the X-Perl window closes, the list must be on the Esc list again")
     check(lua.eval("XPerlLocked") == 0, "the addon must never run X-Perl's own functions")
+    late_idx2 = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
+    check(late_idx == late_idx2, f"the list must never move other windows in UISpecialFrames: {late_idx} -> {late_idx2}")
     # A frame that answers IsShown with a secret value must be skipped, not tested
     lua.execute('issecretvalue = function(v) return type(v) == "table" and v.secret == true end '
                 'SecretF = CreateFrame("Frame", "SecretF", UIParent) SecretF:Hide() '

@@ -74,11 +74,29 @@ end
 local watching = nil     -- windows opened from this list that are still open
 local watcher            -- frame whose OnUpdate checks `watching`
 
-local function setEscClosable(on)
-  for i = #UISpecialFrames, 1, -1 do
-    if UISpecialFrames[i] == FRAME_NAME then table.remove(UISpecialFrames, i) end
+-- The game's own Esc code reads UISpecialFrames. Any entry this addon writes, or moves, is marked as
+-- touched by this addon, and the game's Esc code then runs tainted for it. table.remove() moves every
+-- entry after the removed one, so it marks other addons' windows too (user report 2026-11-21: after a
+-- button opened X-Perl, Esc no longer opened the game menu, and X-Perl's frames lost health and mana).
+-- So entries are never removed or moved. A slot is switched to a name that is not a window, and reused.
+local NO_WINDOW = "CombinedAddonMenusNoEsc"
+
+local function claimSlot(name)
+  for i = 1, #UISpecialFrames do
+    if UISpecialFrames[i] == NO_WINDOW then UISpecialFrames[i] = name return end
   end
-  if on then table.insert(UISpecialFrames, FRAME_NAME) end
+  table.insert(UISpecialFrames, name)
+end
+
+local function freeSlots(match)
+  for i = 1, #UISpecialFrames do
+    if match(UISpecialFrames[i]) then UISpecialFrames[i] = NO_WINDOW end
+  end
+end
+
+local function setEscClosable(on)
+  freeSlots(function(n) return n == FRAME_NAME end)
+  if on then claimSlot(FRAME_NAME) end
 end
 
 -- The game can answer with a "secret" value (a hidden answer that addon code may not test).
@@ -219,15 +237,13 @@ local function lendEsc(f, name)
   for _, n in ipairs(UISpecialFrames) do
     if n == name then return false end
   end
-  table.insert(UISpecialFrames, name)
+  claimSlot(name)
   lent[name] = true
   return true
 end
 
 local function returnEsc()
-  for i = #UISpecialFrames, 1, -1 do
-    if lent[UISpecialFrames[i]] then table.remove(UISpecialFrames, i) end
-  end
+  freeSlots(function(n) return lent[n] end)
   wipe(lent)
 end
 
