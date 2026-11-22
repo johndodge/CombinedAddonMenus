@@ -232,6 +232,12 @@ local NO_LEND = { XPerl_Options = true }
 local function lendEsc(f, name)
   if type(name) ~= "string" or lent[name] or _G[name] ~= f then return false end
   if NO_LEND[name] then return true end
+  -- Only real windows: direct children of UIParent, not a shared game frame. Child frames that
+  -- an addon shows in bulk (X-Perl's preview health/mana bars) must never reach the Esc list: Esc hid them
+  -- and the game menu did not open (found by review 2026-11-21, confirmed by /cam nowatch).
+  local okP, parent = pcall(f.GetParent, f)
+  if not okP or parent ~= UIParent then return false end
+  if shared(name) then return false end
   local ok, protected = pcall(f.IsProtected, f)
   if not ok or secret(protected) or protected then return false end
   for _, n in ipairs(UISpecialFrames) do
@@ -352,10 +358,13 @@ function UI.runAction(action, button, mouseButton)
         end
       end
     end
-    for f, name in pairs(topWindows()) do
+    local nowShown, newCount = topWindows(), 0
+    for f in pairs(nowShown) do if not topBefore[f] then newCount = newCount + 1 end end
+    for f, name in pairs(nowShown) do
       if not topBefore[f] then
         topBefore[f] = name
-        if listWasShown and lendEsc(f, name) then
+        -- More than 3 new frames from one click is a mass show (a preview), not a window: lend none.
+        if listWasShown and newCount <= 3 and lendEsc(f, name) then
           found = true
           watching = watching or {}
           watching[f] = true

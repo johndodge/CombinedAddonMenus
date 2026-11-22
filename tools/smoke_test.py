@@ -50,6 +50,7 @@ local function newObj(name)
     GetPoint = function(self) return "CENTER", nil, "CENTER", 0, 0 end,
     Click = function(self, b) if self.scripts.OnClick then self.scripts.OnClick(self, b or "LeftButton") end end,
     GetName = function(self) return self.name end,
+    GetParent = function(self) return self.parentFrame end,
     GetChildren = function(self) return unpack(self.children) end,
     GetChecked = function(self) return self.checked end,
     SetChecked = function(self, v) self.checked = v end,
@@ -64,6 +65,7 @@ function CreateFrame(kind, name, parent)
   local f = newObj(name)
   if kind == "EditBox" then f.needsFont = true end
   if name then _G[name] = f end
+  f.parentFrame = parent
   if parent and parent.children then table.insert(parent.children, f) end
   table.insert(allFrames, f)
   return f
@@ -365,6 +367,15 @@ def main():
     check(lua.eval("XPerlLocked") == 0, "the addon must never run X-Perl's own functions")
     late_idx2 = lua.eval('(function() for i, n in ipairs(UISpecialFrames) do if n == "ZZLateWindow" then return i end end end)()')
     check(late_idx == late_idx2, f"the list must never move other windows in UISpecialFrames: {late_idx} -> {late_idx2}")
+    # A click that shows many child frames at once (X-Perl's preview of its unit frames) must lend none of them
+    lua.execute('PV = CreateFrame("Frame", "XPerl_PreviewHolder", UIParent) PV:Hide() PVK = {} '
+                'for i = 1, 6 do PVK[i] = CreateFrame("Frame", "XPerl_PreviewBar" .. i, PV) PVK[i]:SetSize(200, 80) PVK[i]:Hide() end')
+    lua.execute("if not CombinedAddonMenusFrame:IsShown() then CombinedAddonMenusFrame:Show() end")
+    prev = lua.eval('{ id = "Preview Launcher", kind = "launcher", label = "Preview", run = function() PV:Show() for i = 1, 6 do PVK[i]:Show() end end }')
+    ns.UI.runAction(prev, lua.table(), "LeftButton")
+    check(not any(lua.eval(f"inEsc('XPerl_PreviewBar{i}')") for i in range(1, 7)) and not lua.eval("inEsc('XPerl_PreviewHolder')"),
+          "child frames shown in bulk by a click must never be lent to Esc")
+    check(lua.eval("inEsc('CombinedAddonMenusFrame')"), "a click that lent nothing must leave the list on the Esc list")
     # A frame that answers IsShown with a secret value must be skipped, not tested
     lua.execute('issecretvalue = function(v) return type(v) == "table" and v.secret == true end '
                 'SecretF = CreateFrame("Frame", "SecretF", UIParent) SecretF:Hide() '
