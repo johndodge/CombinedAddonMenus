@@ -10,7 +10,7 @@ import sys
 from lupa import lua51
 
 HERE = pathlib.Path(__file__).resolve().parent
-ADDON = HERE.parent / "addon" / "CombinedAddonMenus"
+ADDON = HERE.parent
 
 MOCK = r"""
 calls = {}

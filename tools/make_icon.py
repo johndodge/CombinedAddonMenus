@@ -1,7 +1,7 @@
 """Draws the Combined Addon Menus logo: a riveted metal plate with a beveled frame, a glowing inner
 panel, and a gradient capital M. One logo per skin, in that skin's colors.
 
-Writes addon/CombinedAddonMenus/media/Logo_<skin>.tga (128x128, 32-bit, uncompressed, which the
+Writes media/Logo_<skin>.tga (128x128, 32-bit, uncompressed, which the
 game reads) and Icon.tga (a copy of the Classic logo, used by the .toc IconTexture).
 Run: python tools/make_icon.py [--preview out.png]
 """
@@ -10,7 +10,7 @@ import sys
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-MEDIA = pathlib.Path(__file__).resolve().parent.parent / "addon" / "CombinedAddonMenus" / "media"
+MEDIA = pathlib.Path(__file__).resolve().parent.parent / "media"
 S = 512          # drawn large, then shrunk for smooth edges
 OUT = 128        # the game needs power-of-two sizes
 FONTS = ["C:/Windows/Fonts/BOD_BLAR.TTF", "C:/Windows/Fonts/georgiab.ttf", "C:/Windows/Fonts/arialbd.ttf"]

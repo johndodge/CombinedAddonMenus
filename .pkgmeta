@@ -1,0 +1,9 @@
+package-as: CombinedAddonMenus
+
+ignore:
+  - CLAUDE.md
+  - CURSEFORGE.md
+  - FINDINGS.md
+  - PLAN.md
+  - tools
+  - dist
