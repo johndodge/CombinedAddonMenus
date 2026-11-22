@@ -20,6 +20,13 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - `tools/smoke_test.py`: runs the addon in Lua 5.1 (lupa) against a small mock of the game. Needs a venv with `lupa` (`python -m venv X; X/Scripts/python -m pip install lupa`).
 - WoW Forever is at `D:\World of Warcraft\_forever_`. Don't create or change anything under `D:\World of Warcraft\` without asking.
 
+## Release process (user, 2026-11-21)
+
+1. **While changing or testing:** every change or test build gets a commit and a version bump (0.3.x, `## Version:` in the `.toc`, plus a Status line below). Do not touch the CurseForge description or version history in this stage. Different tries are not release notes.
+2. **When the user says testing passed and the change is fully understood:** push to GitHub, update `CURSEFORGE.md` (description if features changed), add an entry to the **Version history** at the bottom of `CURSEFORGE.md`, rebuild `dist/CombinedAddonMenus-<version>.zip` with forward-slash paths (Python `zipfile`, not `Compress-Archive`), and commit.
+3. Version history lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a history entry for a build that is still being tried.
+4. Ask the user if unsure whether testing has passed.
+
 ## Decisions (user, 2026-11-20)
 
 - Published on CurseForge under the **MIT** license, author **Tieme** (`addon/CombinedAddonMenus/LICENSE.txt`, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`.

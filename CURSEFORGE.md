@@ -50,3 +50,29 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 ## Feedback
 
 Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/cam debug`.
+
+## Version history
+
+**0.3.18**
+- Press Esc in a window you opened from the list and that window now closes, with its own Close step. For example, X-Perl's options window closes and its move-me frames go away.
+- Fixed a bug where Esc could hide health and mana on other addons' unit frames, and could stop the game menu opening.
+- Esc never hides small preview frames that an addon shows when you open its menu.
+
+**0.3.11**
+- Fixed an error ("secret boolean value") when opening some addons' windows.
+
+**0.3.8 - 0.3.10**
+- Frostglass skin is darker and less see-through.
+- Parchment skin text is sharper.
+- Text shadows are off in every skin.
+- Esc now finds windows that sit under another frame (such as X-Perl's options).
+
+**0.3.4**
+- Fixed slash command buttons missing on the first open after a reload.
+
+**0.3.1**
+- Buttons that open the same thing are joined into one button that shows every name, for example `Minimap = /ttwin`. Shift-click splits them.
+
+**0.3.0**
+- Renamed to Combined Addon Menus. The command is now `/cam`.
+
