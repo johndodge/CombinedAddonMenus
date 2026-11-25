@@ -449,6 +449,27 @@ local function scanBroker(rows, ldbNames)
   note("Minimap", found .. " launchers")
 end
 
+-- Minimap buttons that do not use LibDataBroker (Spy, X-Perl, BuffRadar, Lore Forever).
+local function scanLoose(rows)
+  local found = 0
+  local buttons = ns.Options and ns.Options.looseButtons and ns.Options.looseButtons() or {}
+  for name, f in pairs(buttons) do
+    local base = name:gsub("MinimapButton", ""):gsub("Minimap", ""):gsub("Button", ""):gsub("_Frame$", ""):gsub("_$", "")
+    local owner = Scan.match(name) or Scan.match(base)
+    found = found + 1
+    addAction(rows, owner, base ~= "" and base or name, {
+      kind = "minimap",
+      detail = "Minimap: " .. name,
+      tip = "Same as clicking this addon's minimap button. Right-click works too.",
+      run = function(button, mouseButton)
+        local fn = f:GetScript("OnClick")
+        if fn then fn(f, mouseButton or "LeftButton") end
+      end,
+    })
+  end
+  note("Minimap (loose buttons)", found .. " found")
+end
+
 ---------------------------------------------------------------------------
 -- Source 4: slash commands
 ---------------------------------------------------------------------------
@@ -610,6 +631,7 @@ function Scan.run(includeBlacklisted)
     function() scanSettings(rows) end,
     function() scanCompartmentToc(rows) end,
     function() scanBroker(rows, ldbNames) end,
+    function() scanLoose(rows) end,
     function() scanCompartmentRuntime(rows, ldbNames) end,
     function() scanSlash(rows) end,
     function() scanExtras(rows) end,

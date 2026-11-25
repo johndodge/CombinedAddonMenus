@@ -23,7 +23,7 @@ end
 local DEFAULTS = {
   skin = "classic",
   button = { show = true },   -- the menu button; pos is set when the user moves it
-  hiddenIcons = {},           -- other addons' minimap icons the user hid (LibDBIcon names)
+  shownIcons = {},            -- other addons' minimap icons the user chose to show; all others are hidden
   blacklist = {},             -- rows (addon keys) hidden from the list
   effects = {},               -- what each button opens, learned on click (duplicate hiding)
 }
@@ -125,6 +125,7 @@ events:SetScript("OnEvent", function(self, event, arg1)
     -- Some addons make their minimap icon a little after login.
     if C_Timer and C_Timer.After then
       C_Timer.After(3, function() pcall(ns.Options.hookIcons) pcall(ns.Options.applyIconHiding) end)
+      C_Timer.After(10, function() pcall(ns.Options.applyIconHiding) end)
     end
   end
 end)

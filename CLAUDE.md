@@ -63,6 +63,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (2026-11-21)
 
+- 0.3.23 (2026-11-25, user request): other addons' minimap icons are hidden by default; the settings page has Select all / Deselect all. Saved setting `shownIcons` (names ticked) replaces `hiddenIcons` (old choices are dropped). Minimap buttons without LibDBIcon (Spy, X-Perl, BuffRadar, Lore Forever) are now found (`Options.looseButtons`: named Button children of Minimap whose global is not owned by the game), listed in the settings page, hidden by default, and get a "Minimap" button in the list. Smoke test passes; not yet tried in game.
 - 0.3.22 (2026-11-22): `## Interface` is now `16001` only (WoW Forever, shown as 1.60.1 on CurseForge). It was `16001, 120105, 120107`, so CurseForge listed the file for 12.1.5 and 12.1.7 too. User wants Forever only for now. Committed locally; not pushed or tagged yet.
 - 0.3.21 (2026-11-22): no code change. Test release to check CurseForge automatic packaging. Cause of the earlier no-file pushes: the CurseForge project had no Source (repository) set (log: "No Source information found for the project"). The user set it in the author console. The GitHub webhook (push event, project 1820321) was already right.
 - 0.3.20 (2026-11-22): the "M button" is now called the "menu button" in all player text (help line, chat messages, settings page, tooltip, CurseForge description) because the new picture is not an M. The saved setting `button` keeps its name so positions are kept. Pushed with the tag `v0.3.20-beta`.

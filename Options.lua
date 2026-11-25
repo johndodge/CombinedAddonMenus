@@ -10,7 +10,7 @@ local PAGE_W = 600
 local COL_W = 290
 
 ---------------------------------------------------------------------------
--- Other addons' minimap icons (LibDBIcon). Hidden names are saved in CombinedAddonMenusDB.hiddenIcons.
+-- Other addons' minimap icons (LibDBIcon). Names the user chose to show are saved in CombinedAddonMenusDB.shownIcons (all others are hidden).
 ---------------------------------------------------------------------------
 local function dbicon() return LibStub and LibStub("LibDBIcon-1.0", true) end
 
@@ -25,23 +25,67 @@ local function hiddenByAddon(name)
   return b and type(b.db) == "table" and b.db.hide and true or false
 end
 
-function Options.iconNames()
-  local lib, out = dbicon(), {}
-  if lib and type(lib.objects) == "table" then
-    for name in pairs(lib.objects) do
-      if type(name) == "string" then out[#out + 1] = name end
+-- Loose minimap buttons: addons that make their own button on the minimap without LibDBIcon
+-- (Spy, X-Perl, BuffRadar, Lore Forever). Found as named Button children of the Minimap.
+-- The game's own buttons are skipped: their global name is owned by the game (issecurevariable).
+local looseHooked = {}
+function Options.looseButtons()
+  local out = {}
+  if not Minimap or type(Minimap.GetChildren) ~= "function" then return out end
+  for _, f in ipairs({ Minimap:GetChildren() }) do
+    local ok, name = pcall(function()
+      if f:IsForbidden() then return nil end
+      if f:GetObjectType() ~= "Button" or not f:GetScript("OnClick") then return nil end
+      return f:GetName()
+    end)
+    if ok and type(name) == "string" and name ~= ""
+        and not name:find("^LibDBIcon10_") and not name:find("^CombinedAddonMenus")
+        and not issecurevariable(_G, name) then
+      out[name] = f
     end
   end
+  return out
+end
+
+-- An icon is shown only if the user ticked it (default: every other addon's icon is hidden).
+local function wanted(name) return ns.db and ns.db.shownIcons and ns.db.shownIcons[name] end
+
+function Options.iconNames()
+  local lib, seen, out = dbicon(), {}, {}
+  if lib and type(lib.objects) == "table" then
+    for name in pairs(lib.objects) do
+      if type(name) == "string" then seen[name] = true end
+    end
+  end
+  for name in pairs(Options.looseButtons()) do seen[name] = true end
+  for name in pairs(seen) do out[#out + 1] = name end
   table.sort(out, function(a, b) return a:lower() < b:lower() end)
   return out
 end
 
-function Options.applyIconHiding()
-  local lib = dbicon()
-  if not lib or not ns.db then return end
-  for name in pairs(ns.db.hiddenIcons) do
-    if iconButton(name) then lib:Hide(name) end
+local function applyLoose(name, f)
+  if not looseHooked[f] then
+    looseHooked[f] = true
+    f:HookScript("OnShow", function(self)
+      if not wanted(name) then self:Hide() end
+    end)
   end
+  if wanted(name) then
+    -- Only an addon's own setting may keep it hidden; we cannot know it, so leave it as it is.
+  else
+    f:Hide()
+  end
+end
+
+function Options.applyIconHiding()
+  if not ns.db then return end
+  local lib = dbicon()
+  if lib and type(lib.objects) == "table" then
+    for name in pairs(lib.objects) do
+      if type(name) == "string" and not wanted(name) and iconButton(name) then lib:Hide(name) end
+    end
+  end
+  for name, f in pairs(Options.looseButtons()) do applyLoose(name, f) end
 end
 
 -- If an addon shows its icon again (or registers it late), hide it again.
@@ -51,7 +95,7 @@ function Options.hookIcons()
   if not lib or hookedLib == lib or not hooksecurefunc then return end
   hookedLib = lib
   local function rehide(_, name)
-    if ns.db and ns.db.hiddenIcons[name] then
+    if ns.db and not wanted(name) then
       local b = iconButton(name)
       if b then b:Hide() end
     end
@@ -61,8 +105,14 @@ function Options.hookIcons()
 end
 
 function Options.setIconShown(name, show)
+  ns.db.shownIcons[name] = show and true or nil
+  local loose = Options.looseButtons()[name]
+  if loose then
+    applyLoose(name, loose)
+    if show then loose:Show() end
+    return
+  end
   local lib = dbicon()
-  ns.db.hiddenIcons[name] = (not show) and true or nil
   if not lib then return end
   if show then
     if not hiddenByAddon(name) then lib:Show(name) end
@@ -314,13 +364,23 @@ function Options.build()
   if #names == 0 then
     para("No addon uses the shared minimap icon library (LibDBIcon), so there is nothing to show here.")
   else
-    para("Untick an addon to hide its icon from the minimap. You can still open it from Combined Addon Menus. "
+    para("Tick an addon to show its icon on the minimap. All other icons are hidden. "
+      .. "You can still open every addon from Combined Addon Menus. "
       .. "Icons marked (hidden by its addon) are switched off in that addon's own settings.")
+    plainButton("Select all", function()
+      for _, n in ipairs(names) do Options.setIconShown(n, true) end
+      Options.build()
+    end)
+    plainButton("Deselect all", function()
+      for _, n in ipairs(names) do Options.setIconShown(n, false) end
+      Options.build()
+    end, 206)
+    y = y + 30
     local items = {}
     for _, name in ipairs(names) do
       local label = name
       if hiddenByAddon(name) then label = name .. " (hidden by its addon)" end
-      items[#items + 1] = { label, not ns.db.hiddenIcons[name], function(on) Options.setIconShown(name, on) end }
+      items[#items + 1] = { label, ns.db.shownIcons[name] and true or false, function(on) Options.setIconShown(name, on) end }
     end
     checkList(items)
   end

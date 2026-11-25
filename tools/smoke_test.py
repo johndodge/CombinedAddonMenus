@@ -512,15 +512,38 @@ def main():
         check(ns.db.skin == ns.Skins.order[len(ns.Skins.order)], "Skins.set must save the skin")
         ns.Skins.set("classic")
 
-    # Other addons' minimap icons: hide, stays hidden if the addon shows it again, show again
-    ns.Options.setIconShown("DBM", False)
-    check(ns.db.hiddenIcons.DBM is True and not G.dbicon.objects.DBM.shown, "hiding an icon must hide it and save it")
-    G.dbicon.Show(G.dbicon, "DBM")
-    check(not G.dbicon.objects.DBM.shown, "an icon the user hid must stay hidden when its addon shows it")
+    # Other addons' minimap icons: all hidden by default, tick to show, stays hidden if the addon shows it again
+    ns.Options.applyIconHiding()
+    check(not G.dbicon.objects.DBM.shown, "icons must be hidden by default")
     ns.Options.setIconShown("DBM", True)
-    check(ns.db.hiddenIcons.DBM is None and G.dbicon.objects.DBM.shown, "showing an icon must show it and forget it")
+    check(ns.db.shownIcons.DBM is True and G.dbicon.objects.DBM.shown, "showing an icon must show it and save it")
+    ns.Options.setIconShown("DBM", False)
+    check(ns.db.shownIcons.DBM is None and not G.dbicon.objects.DBM.shown, "hiding an icon must hide it and forget it")
+    G.dbicon.Show(G.dbicon, "DBM")
+    check(not G.dbicon.objects.DBM.shown, "an icon the user did not tick must stay hidden when its addon shows it")
     ns.Options.setIconShown("TomTom-Paste", True)
     check(not G.dbicon.objects["TomTom-Paste"].shown, "an icon its own addon hides must not be forced on")
+
+    # Loose minimap buttons (no LibDBIcon): found, hidden by default, listed in the scan, clickable
+    lua.execute("""
+      Minimap = CreateFrame("Frame", "Minimap", UIParent)
+      LooseClicks = 0
+      LooseBtn = CreateFrame("Button", "SpyMinimapButton", Minimap)
+      LooseBtn.GetObjectType = function() return "Button" end
+      LooseBtn.IsForbidden = function() return false end
+      local oldSecure = issecurevariable
+      issecurevariable = function(t, k) if t == _G and k == "SpyMinimapButton" then return false, "Spy" end return oldSecure(t, k) end
+      LooseBtn:SetScript("OnClick", function() LooseClicks = LooseClicks + 1 end)
+    """)
+    names = list(ns.Options.iconNames().values())
+    check("SpyMinimapButton" in names, f"a loose minimap button must be listed: {names}")
+    ns.Options.applyIconHiding()
+    check(not G.LooseBtn.IsShown(G.LooseBtn), "a loose minimap button must be hidden by default")
+    ns.Options.setIconShown("SpyMinimapButton", True)
+    check(G.LooseBtn.IsShown(G.LooseBtn), "ticking a loose button must show it")
+    rows = ns.Scan.run()
+    spy = [r for r in rows.values() if "spy" in r.title.lower()]
+    check(bool(spy) and any(a.kind == "minimap" for a in spy[0].actions.values()), "scan must list the loose button")
 
     if failures:
         print("FAILED:")
