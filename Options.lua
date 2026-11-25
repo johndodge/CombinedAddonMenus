@@ -40,13 +40,32 @@ function Options.looseButtons()
       -- Real minimap buttons are about 25-45 px. Map pins (Questie, GatherMate) are smaller.
       if type(w) == "number" and (w < 24 or w > 50) then return nil end
       if type(h) == "number" and (h < 24 or h > 50) then return nil end
+      -- Real buttons sit on the edge ring of the minimap. Pins sit inside it.
+      local mx, my = Minimap:GetCenter()
+      local fx, fy = f:GetCenter()
+      local mw = Minimap:GetWidth()
+      if type(mx) == "number" and type(fx) == "number" and type(mw) == "number" and mw > 0 then
+        local d = math.sqrt((fx - mx) ^ 2 + (fy - my) ^ 2)
+        if d < mw / 2 * 0.75 then return nil end
+      end
       return f:GetName()
     end)
     if ok and type(name) == "string" and name ~= ""
-        and not name:find("^LibDBIcon10_") and not name:find("%d$") and not name:find("^CombinedAddonMenus")
+        and not name:find("^LibDBIcon10_") and not name:find("^CombinedAddonMenus")
         and not issecurevariable(_G, name) then
       out[name] = f
     end
+  end
+  -- Pools of pins share a name with a changing number (QuestieFrame14, QuestieFrame15...).
+  -- Several buttons with the same name stem are pins, not a minimap button.
+  local stems = {}
+  for name in pairs(out) do
+    local stem = name:gsub("%d+$", "")
+    stems[stem] = (stems[stem] or 0) + 1
+  end
+  for name in pairs(out) do
+    local stem = name:gsub("%d+$", "")
+    if stem ~= name and stems[stem] > 2 then out[name] = nil end
   end
   return out
 end
