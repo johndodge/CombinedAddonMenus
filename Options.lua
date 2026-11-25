@@ -36,10 +36,14 @@ function Options.looseButtons()
     local ok, name = pcall(function()
       if f:IsForbidden() then return nil end
       if f:GetObjectType() ~= "Button" or not f:GetScript("OnClick") then return nil end
+      local w, h = f:GetWidth(), f:GetHeight()
+      -- Real minimap buttons are about 25-45 px. Map pins (Questie, GatherMate) are smaller.
+      if type(w) == "number" and (w < 24 or w > 50) then return nil end
+      if type(h) == "number" and (h < 24 or h > 50) then return nil end
       return f:GetName()
     end)
     if ok and type(name) == "string" and name ~= ""
-        and not name:find("^LibDBIcon10_") and not name:find("^CombinedAddonMenus")
+        and not name:find("^LibDBIcon10_") and not name:find("%d$") and not name:find("^CombinedAddonMenus")
         and not issecurevariable(_G, name) then
       out[name] = f
     end
