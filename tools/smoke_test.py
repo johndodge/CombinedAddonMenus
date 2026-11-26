@@ -488,14 +488,30 @@ def main():
         was = bool(ns.UI.isShown())
         mbtn.Click(mbtn, "LeftButton")
         check(bool(ns.UI.isShown()) == was, "a plain click on the menu button must not toggle the list")
-        check(G.menuLog is not None and len(G.menuLog.kids) > 3, "a plain click must open the drop-down with one entry per addon")
-        tt = [k for k in G.menuLog.kids.values() if k.label == "TomTom"]
-        check(bool(tt) and len(tt[0].kids) >= 4, "an addon entry must have its buttons in a side menu")
+        d1 = G.CombinedAddonMenusDrop1
+        check(d1 is not None and d1.shown, "a plain click must open our own drop-down")
+        check(bool(G.inEsc("CombinedAddonMenusDrop1")), "Esc must close the drop-down (UISpecialFrames)")
+        rows1 = d1.rows
+        shownRows = [rows1[i] for i in range(1, len(rows1) + 1) if rows1[i].shown]
+        check(len(shownRows) > 3, "the drop-down must have one entry per addon")
+        tt = [r for r in shownRows if r.entry.text == "TomTom"]
+        check(bool(tt), "the drop-down must list TomTom")
         if tt:
-            slash = [k for k in tt[0].kids.values() if k.label.startswith("/way")]
+            tt[0].scripts.OnEnter(tt[0])
+            d2 = G.CombinedAddonMenusDrop2
+            check(d2 is not None and d2.shown, "pointing at an addon must open its side menu")
+            rows2 = [d2.rows[i] for i in range(1, len(d2.rows) + 1) if d2.rows[i].shown]
+            check(len(rows2) >= 4, "an addon entry must have its buttons in a side menu")
+            slash = [r for r in rows2 if r.entry.text.startswith("/way")]
             n0 = len(list(G.calls.values()))
-            slash[0].fn()
+            slash[0].scripts.OnClick(slash[0])
             check(len(list(G.calls.values())) > n0, "a side-menu button must run its action")
+            check(not d1.shown and not d2.shown, "clicking a side-menu button must close the drop-down")
+            check(not G.inEsc("CombinedAddonMenusDrop1"), "the Esc entry must be freed when the drop-down closes")
+        mbtn.Click(mbtn, "LeftButton")
+        check(d1.shown, "a plain click must open the drop-down again")
+        mbtn.Click(mbtn, "LeftButton")
+        check(not d1.shown, "a second plain click must close the drop-down")
         lua.execute("ctrlDown = true")
         mbtn.Click(mbtn, "LeftButton")
         lua.execute("ctrlDown = false")

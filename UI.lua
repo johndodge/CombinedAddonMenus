@@ -94,6 +94,17 @@ local function freeSlots(match)
   end
 end
 
+-- Used by Dropdown.lua: Esc closes the drop-down. Same rule as above: slots are reused, never removed.
+function UI.claimEscSlot(name)
+  for i = 1, #UISpecialFrames do
+    if UISpecialFrames[i] == name then return end
+  end
+  claimSlot(name)
+end
+function UI.freeEscSlot(name)
+  freeSlots(function(n) return n == name end)
+end
+
 local function setEscClosable(on)
   freeSlots(function(n) return n == FRAME_NAME end)
   if on then claimSlot(FRAME_NAME) end

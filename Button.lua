@@ -30,27 +30,25 @@ end
 
 -- The drop-down: one entry per addon in the list; pointing at it opens a side menu with that addon's buttons.
 function Button.showMenu()
-  if not (MenuUtil and MenuUtil.CreateContextMenu) then
-    ns.say("This game version has no drop-down menu support, so the list opened instead.")
-    ns.UI.toggle()
-    return
-  end
+  if ns.Dropdown.isOpen() then ns.Dropdown.close() return end
   local ok, rows = pcall(ns.Scan.run)
   if not ok or #rows == 0 then
     ns.say("The scan found nothing to show. Ctrl-click the button to open the big list.")
     return
   end
   local owner = btn
-  MenuUtil.CreateContextMenu(owner, function(_, root)
-    for _, row in ipairs(rows) do
-      local sub = root:CreateButton(row.title)
-      for _, action in ipairs(row.actions) do
-        sub:CreateButton(action.display or action.label or action.detail, function()
-          ns.UI.runAction(action, owner, "LeftButton")
-        end)
-      end
+  local entries = {}
+  for _, row in ipairs(rows) do
+    local children = {}
+    for _, action in ipairs(row.actions) do
+      children[#children + 1] = {
+        text = action.display or action.label or action.detail,
+        func = function() ns.UI.runAction(action, owner, "LeftButton") end,
+      }
     end
-  end)
+    entries[#entries + 1] = { text = row.title, children = children }
+  end
+  ns.Dropdown.open(owner, entries)
 end
 
 local function create()
