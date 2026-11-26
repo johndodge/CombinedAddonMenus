@@ -172,7 +172,7 @@ function Dropdown.open(anchor, entries, depth)
   if depth == 1 then closeFrom(1) end
   local f = level(depth)
   local skin = ns.Skins.current()
-  ns.Skins.paintFrame(f, skin)
+  ns.Skins.paintFrame(f, skin, true)
   if f.thumb.SetColorTexture and skin.muted then
     f.thumb:SetColorTexture(skin.muted[1], skin.muted[2], skin.muted[3], 0.8)
   end

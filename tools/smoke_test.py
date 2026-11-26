@@ -482,6 +482,11 @@ def main():
     # The M button: exists, left-click toggles the list, right-click opens our settings page
     G = lua.globals()
     mbtn = G.CombinedAddonMenusButton
+    order = ns.Skins.order
+    for i in range(1, len(order) + 1):
+        ns.Skins.set(order[i])
+    check(len(order) == 56, "there must be 56 skins (6 + 50 themes)")
+    ns.Skins.set("classic")
     check(mbtn is not None and mbtn.shown, "the M button must exist and show at login")
     if mbtn is not None:
         lua.execute("SettingsPanel:Hide()")

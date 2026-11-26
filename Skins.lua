@@ -92,10 +92,186 @@ Skins.list = {
   },
 }
 
+-- Extra drawing on a skinned frame: inner lines, glow, corners, a top bar, a gradient and scan lines.
+-- Everything is a texture on the frame, made once and reused. Features a skin does not use are hidden.
+local BLACK, WHITE_C = { 0, 0, 0 }, { 1, 1, 1 }
+
+local function dtex(f, key, layer)
+  f._deco = f._deco or {}
+  local t = f._deco[key]
+  if not t then
+    t = f:CreateTexture(nil, layer or "BORDER")
+    t:SetTexture(WHITE)
+    f._deco[key] = t
+  end
+  return t
+end
+
+local function dhide(f, prefix)
+  if not f._deco then return end
+  for k, t in pairs(f._deco) do
+    if k:sub(1, #prefix) == prefix then t:Hide() end
+  end
+end
+
+local function dcolor(skin, name, a)
+  local c = skin.frameBorder
+  if name == "white" then c = WHITE_C elseif name == "black" then c = BLACK elseif name == "accent" then c = skin.accent or c end
+  return c[1], c[2], c[3], a
+end
+
+local function dbox(f, key, skin, inset, th, colorName, a)
+  for _, side in ipairs({ "t", "b", "l", "r" }) do
+    local t = dtex(f, key .. side)
+    t:ClearAllPoints()
+    if side == "t" then
+      t:SetPoint("TOPLEFT", f, "TOPLEFT", inset, -inset) t:SetPoint("TOPRIGHT", f, "TOPRIGHT", -inset, -inset) t:SetHeight(th)
+    elseif side == "b" then
+      t:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", inset, inset) t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -inset, inset) t:SetHeight(th)
+    elseif side == "l" then
+      t:SetPoint("TOPLEFT", f, "TOPLEFT", inset, -inset) t:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", inset, inset) t:SetWidth(th)
+    else
+      t:SetPoint("TOPRIGHT", f, "TOPRIGHT", -inset, -inset) t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -inset, inset) t:SetWidth(th)
+    end
+    t:SetColorTexture(dcolor(skin, colorName, a))
+    t:Show()
+  end
+end
+
+local CORNERS = {
+  { "TOPLEFT", 1, -1 }, { "TOPRIGHT", -1, -1 }, { "BOTTOMLEFT", 1, 1 }, { "BOTTOMRIGHT", -1, 1 },
+}
+
+local function gradient(t, top, bot)
+  t:SetColorTexture(1, 1, 1, 1)
+  local ok = false
+  if t.SetGradient and CreateColor then
+    ok = pcall(t.SetGradient, t, "VERTICAL", CreateColor(bot[1], bot[2], bot[3], bot[4]), CreateColor(top[1], top[2], top[3], top[4]))
+  end
+  if not ok and t.SetGradientAlpha then
+    ok = pcall(t.SetGradientAlpha, t, "VERTICAL", bot[1], bot[2], bot[3], bot[4], top[1], top[2], top[3], top[4])
+  end
+  if not ok then t:SetColorTexture(top[1], top[2], top[3], (top[4] + bot[4]) / 2) end
+end
+
+local function scanLines(f, skin, cfg)
+  local d = f._deco
+  d.scan = d.scan or {}
+  local h = (f.GetHeight and f:GetHeight()) or 0
+  local n = cfg and math.min(math.floor(h / cfg.gap), 200) or 0
+  for i = 1, math.max(n, #d.scan) do
+    local t = d.scan[i]
+    if i <= n then
+      if not t then t = f:CreateTexture(nil, "BORDER") t:SetTexture(WHITE) d.scan[i] = t end
+      t:ClearAllPoints()
+      t:SetPoint("TOPLEFT", f, "TOPLEFT", 3, -3 - i * cfg.gap)
+      t:SetPoint("TOPRIGHT", f, "TOPRIGHT", -3, -3 - i * cfg.gap)
+      t:SetHeight(1)
+      t:SetColorTexture(0, 0, 0, cfg.a)
+      t:Show()
+    elseif t then
+      t:Hide()
+    end
+  end
+end
+
+function Skins.decorate(f, skin, small)
+  if not f.CreateTexture then return end
+  local cfg = skin.deco or {}
+  f._decoSkin, f._decoSmall = skin, small
+  -- inner line
+  if cfg.inner then
+    dbox(f, "inner", skin, cfg.inner.inset, cfg.inner.th, cfg.inner.color, cfg.inner.a)
+  else dhide(f, "inner") end
+  -- glow: lines outside the frame
+  dhide(f, "glow")
+  if cfg.glow then
+    for i, g in ipairs(cfg.glow) do dbox(f, "glow" .. i, skin, g.inset, 1, g.color or "accent", g.a) end
+  end
+  -- gradient
+  if cfg.sheen then
+    local t = dtex(f, "sheen")
+    t:ClearAllPoints()
+    t:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
+    t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+    local r, g, b = dcolor(skin, cfg.sheen.color, 1)
+    gradient(t, { r, g, b, cfg.sheen.top }, { r, g, b, cfg.sheen.bot })
+    t:Show()
+  else dhide(f, "sheen") end
+  -- corners, top bar and scan lines are left off small frames (the drop-down)
+  dhide(f, "corner")
+  if cfg.corners and not small then
+    local c = cfg.corners
+    for i, co in ipairs(CORNERS) do
+      local sx, sy = co[2], co[3]
+      if c.kind == "square" then
+        local t = dtex(f, "corner" .. i .. "s", "ARTWORK")
+        t:ClearAllPoints() t:SetPoint(co[1], f, co[1], sx * c.inset, sy * c.inset) t:SetSize(c.size, c.size)
+        t:SetColorTexture(dcolor(skin, c.color, 1)) t:Show()
+      else
+        local h = dtex(f, "corner" .. i .. "h", "ARTWORK")
+        h:ClearAllPoints() h:SetPoint(co[1], f, co[1], sx * c.inset, sy * c.inset) h:SetSize(c.len, c.th)
+        h:SetColorTexture(dcolor(skin, c.color, 1)) h:Show()
+        local v = dtex(f, "corner" .. i .. "v", "ARTWORK")
+        v:ClearAllPoints() v:SetPoint(co[1], f, co[1], sx * c.inset, sy * c.inset) v:SetSize(c.th, c.len)
+        v:SetColorTexture(dcolor(skin, c.color, 1)) v:Show()
+      end
+    end
+  end
+  if cfg.bar and not small then
+    local t = dtex(f, "bar", "ARTWORK")
+    t:ClearAllPoints()
+    t:SetPoint("TOPLEFT", f, "TOPLEFT", cfg.bar.inset, -cfg.bar.inset)
+    t:SetPoint("TOPRIGHT", f, "TOPRIGHT", -cfg.bar.inset, -cfg.bar.inset)
+    t:SetHeight(cfg.bar.h)
+    t:SetColorTexture(dcolor(skin, cfg.bar.color, 1))
+    t:Show()
+  else dhide(f, "bar") end
+  if f._deco then
+    scanLines(f, skin, (not small) and cfg.scan or nil)
+  elseif cfg.scan and not small then
+    f._deco = {}
+    scanLines(f, skin, cfg.scan)
+  end
+  if not f._decoHooked and f.HookScript then
+    f._decoHooked = true
+    f:HookScript("OnSizeChanged", function(self)
+      local sk = self._decoSkin
+      if sk and sk.deco and sk.deco.scan and not self._decoSmall and self._deco then scanLines(self, sk, sk.deco.scan) end
+    end)
+  end
+end
+
+-- Small raised/underlined look on a button, used by the button styles that ask for it.
+local function buttonDeco(b, style)
+  local function t(key)
+    b._bdeco = b._bdeco or {}
+    local x = b._bdeco[key]
+    if not x then x = b:CreateTexture(nil, "ARTWORK") x:SetTexture(WHITE) b._bdeco[key] = x end
+    return x
+  end
+  if style.underline then
+    local u = t("ul")
+    u:ClearAllPoints() u:SetPoint("BOTTOMLEFT", 2, 2) u:SetPoint("BOTTOMRIGHT", -2, 2) u:SetHeight(2)
+    u:SetColorTexture(style.underline[1], style.underline[2], style.underline[3], style.underline[4] or 1) u:Show()
+  elseif b._bdeco and b._bdeco.ul then b._bdeco.ul:Hide() end
+  if style.bevel then
+    local hi, lo = t("hi"), t("lo")
+    hi:ClearAllPoints() hi:SetPoint("TOPLEFT", 2, -2) hi:SetPoint("TOPRIGHT", -2, -2) hi:SetHeight(1)
+    hi:SetColorTexture(1, 1, 1, 0.22) hi:Show()
+    lo:ClearAllPoints() lo:SetPoint("BOTTOMLEFT", 2, 2) lo:SetPoint("BOTTOMRIGHT", -2, 2) lo:SetHeight(1)
+    lo:SetColorTexture(0, 0, 0, 0.4) lo:Show()
+  elseif b._bdeco then
+    if b._bdeco.hi then b._bdeco.hi:Hide() end
+    if b._bdeco.lo then b._bdeco.lo:Hide() end
+  end
+end
+
 ---------------------------------------------------------------------------
--- Colour themes #7 to #56 (added 0.3.34). Each one is a few colours; theme() works out the rest.
--- The number is the position in Skins.order and is shown in the settings page drop-down, so a theme can be
--- removed by number. They reuse the Classic logo (media\Logo_classic).
+-- Colour themes #7 to #56. Each is three colours plus a "feel" (FEELS below) that sets the frame style:
+-- extra lines, corners, bars, gradients, scan lines, glow and button shape. The number is the position in
+-- Skins.order, shown in the settings page drop-down, so a theme can be removed by number (delete its theme() line;
+-- the numbers after it shift down). They reuse the Classic logo (media\Logo_classic).
 ---------------------------------------------------------------------------
 local function hex(str)
   local r, g, b = str:match("#(%x%x)(%x%x)(%x%x)")
@@ -105,85 +281,121 @@ local function mix(a, b, t)
   return { a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t }
 end
 local function withAlpha(c, a) return { c[1], c[2], c[3], a } end
-local BLACK, WHITE_C = { 0, 0, 0 }, { 1, 1, 1 }
 
--- o: alpha (frame opacity), style ("flat1" default, "flat2", "tip"), font ("arial"), title (hex)
-local function theme(name, desc, bgHex, accHex, textHex, o)
-  o = o or {}
-  local bg, acc, tx = hex(bgHex), hex(accHex), hex(textHex)
-  local light = (0.299 * bg[1] + 0.587 * bg[2] + 0.114 * bg[3]) > 0.55
-  local alpha = o.alpha or 0.97
-  local glass = alpha < 0.9
-  local function edge() return o.style == "tip" and tipEdge() or flat(o.style == "flat2" and 2 or 1) end
-  local arial = o.font == "arial"
-  local title = o.title and hex(o.title) or mix(acc, light and BLACK or WHITE_C, 0.25)
+-- A feel is a bundle of looks. deco = what Skins.decorate draws on the frame. btn = button shape.
+local FEELS = {
+  etched = { label = "Double line, square corners, raised buttons.", style = "flat2", btn = "bevel",
+    deco = { inner = { inset = 4, th = 1, a = 0.65 }, corners = { kind = "square", inset = 1, size = 6 } } },
+  terminal = { label = "Pixel font, scan lines, bracket corners, outlined buttons.", style = "flat1", font = "arial", flags = "MONOCHROME", btn = "outline",
+    deco = { scan = { gap = 3, a = 0.10 }, corners = { kind = "bracket", inset = 3, len = 9, th = 2 } } },
+  glass = { label = "See-through, shiny top, thin light inner line.", style = "tip", alpha = 0.74, btn = "fill",
+    deco = { sheen = { top = 0.26, bot = 0.02, color = "white" }, inner = { inset = 4, th = 1, a = 0.28, color = "white" } } },
+  paper = { label = "Paper with a soft inner border and raised buttons.", style = "flat1", btn = "bevel",
+    deco = { inner = { inset = 4, th = 1, a = 0.45 }, sheen = { top = 0, bot = 0.14, color = "black" } } },
+  stationery = { label = "Letterhead bar on top, underlined buttons.", style = "flat1", btn = "underline",
+    deco = { bar = { h = 5, inset = 1 }, sheen = { top = 0, bot = 0.10, color = "black" } } },
+  forge = { label = "Heavy plate, thick top bar, rivets, raised buttons.", style = "flat2", btn = "bevel",
+    deco = { bar = { h = 5, inset = 2 }, inner = { inset = 6, th = 1, a = 0.35 }, corners = { kind = "square", inset = 2, size = 5 } } },
+  neon = { label = "Glowing outline and outlined text.", style = "flat1", font = "arial", flags = "OUTLINE", btn = "outline",
+    deco = { glow = { { inset = -1, a = 0.55 }, { inset = -3, a = 0.22 } }, sheen = { top = 0, bot = 0.2, color = "accent" } } },
+  rustic = { label = "Old border, inner frame, soft light from the top.", style = "tip", btn = "bevel",
+    deco = { inner = { inset = 6, th = 1, a = 0.3 }, corners = { kind = "bracket", inset = 6, len = 7, th = 1 }, sheen = { top = 0.10, bot = 0, color = "white" } } },
+  minimal = { label = "Faint border, one thin bar, underlined buttons.", style = "flat1", borderA = 0.4, btn = "underline",
+    deco = { bar = { h = 2, inset = 0 } } },
+  dusk = { label = "Colour glow rising from the bottom edge.", style = "flat1", btn = "fill",
+    deco = { sheen = { top = 0, bot = 0.34, color = "accent" }, inner = { inset = 3, th = 1, a = 0.2 } } },
+}
+
+local function buttonStyle(kind, bg, acc, tx, light, glass, edge)
   local btnBg = mix(bg, acc, light and 0.25 or 0.28)
   local hover = mix(bg, acc, light and 0.5 or 0.55)
+  if kind == "outline" then
+    return { backdrop = edge(), bg = withAlpha(bg, 0), border = withAlpha(acc, 1), hover = withAlpha(acc, 0.35), text = tx }
+  elseif kind == "underline" then
+    return { backdrop = { bgFile = WHITE }, bg = withAlpha(acc, 0), hover = withAlpha(acc, 0.22), text = tx, underline = withAlpha(acc, 1) }
+  elseif kind == "bevel" then
+    return { backdrop = edge(), bg = btnBg, border = withAlpha(mix(acc, bg, 0.3), 1), hover = hover, text = tx, bevel = true }
+  end
+  return { backdrop = edge(), bg = withAlpha(btnBg, glass and 0.5 or 1), border = withAlpha(acc, 1),
+           hover = withAlpha(hover, glass and 0.7 or 1), text = tx }
+end
+
+local function theme(name, desc, bgHex, accHex, textHex, feel, o)
+  local f = {}
+  for k, v in pairs(FEELS[feel]) do f[k] = v end
+  for k, v in pairs(o or {}) do f[k] = v end
+  local bg, acc, tx = hex(bgHex), hex(accHex), hex(textHex)
+  local light = (0.299 * bg[1] + 0.587 * bg[2] + 0.114 * bg[3]) > 0.55
+  local alpha = f.alpha or 0.97
+  local glass = alpha < 0.9
+  local function edge() return f.style == "tip" and tipEdge() or flat(f.style == "flat2" and 2 or 1) end
+  local arial = f.font == "arial"
+  local title = f.title and hex(f.title) or mix(acc, light and BLACK or WHITE_C, 0.25)
   local inBg = light and mix(bg, WHITE_C, 0.6) or mix(bg, BLACK, 0.45)
+  local btn = buttonStyle(f.btn, bg, acc, tx, light, glass, edge)
+  local input = { backdrop = edge(), bg = withAlpha(inBg, glass and 0.6 or 1), border = withAlpha(acc, 1), text = tx }
   local id = "t" .. (#Skins.order + 1)
   Skins.list[id] = {
-    name = name, desc = desc, logo = "classic",
-    font = arial and ARIALN or FRIZ, size = arial and 13 or 12, titleSize = arial and 16 or 15, pad = 10,
+    name = name, desc = desc .. " " .. f.label, logo = "classic", feel = feel,
+    font = arial and ARIALN or FRIZ, flags = f.flags, size = arial and 13 or 12, titleSize = arial and 16 or 15, pad = 10,
     frame = edge(),
-    frameBg = withAlpha(bg, alpha), frameBorder = withAlpha(acc, 1),
+    frameBg = withAlpha(bg, alpha), frameBorder = withAlpha(acc, f.borderA or 1),
     title = title, text = tx, muted = mix(tx, bg, 0.45), line = withAlpha(acc, 0.25),
-    button = { backdrop = edge(), bg = withAlpha(btnBg, glass and 0.5 or 1), border = withAlpha(acc, 1),
-               hover = withAlpha(hover, glass and 0.7 or 1), text = tx },
-    input = { backdrop = edge(), bg = withAlpha(inBg, glass and 0.6 or 1), border = withAlpha(acc, 1), text = tx },
+    button = btn, input = input, deco = f.deco, accent = acc,
   }
   table.insert(Skins.order, id)
 end
 
-theme("Ocean Depths", "Deep sea blue with a bright teal edge.", "#06202e", "#2aa6c9", "#d7f2fb")
-theme("Forest Canopy", "Dark leaf green with fresh green trim.", "#0f2416", "#5fae5a", "#e3f2dc")
-theme("Desert Dusk", "Baked brown with a warm orange glow.", "#2b1b12", "#e0914a", "#f7e3cf")
-theme("Blood Moon", "Near-black red with a crimson edge.", "#1d0606", "#c0282d", "#f3d7d7")
-theme("Royal Purple", "Deep violet with lilac trim.", "#1c0f2e", "#9b6bd6", "#eadcf8")
-theme("Arctic Frost", "Light icy white with steel blue trim.", "#e8f2f8", "#5b9bc4", "#1c3446")
-theme("Sunset", "Dusky plum with a coral edge.", "#2b1230", "#ff7a59", "#ffe6d6")
-theme("Moss and Stone", "Grey-green stone with sage trim.", "#20241d", "#8a9a6b", "#e4e8d8")
-theme("Cherry Blossom", "Pale pink paper with rose trim.", "#fbe8ee", "#d9608a", "#4a1f2f")
-theme("Midnight Gold", "Black with a gold edge.", "#0b0b14", "#d4af37", "#f4ecd0")
-theme("Copper Steam", "Dark brown with copper trim.", "#241710", "#c87533", "#f2dcc4")
-theme("Neon Cyber", "Black with electric cyan lines.", "#0a0a12", "#00f0ff", "#e0fbff", { font = "arial" })
-theme("Synthwave", "Dark purple with hot pink lines.", "#1a0a2e", "#ff2bd6", "#ffe0fa", { font = "arial" })
-theme("Mint Chocolate", "Dark chocolate with mint trim.", "#1f1712", "#5fd6a8", "#e6fff4")
-theme("Slate Minimal", "Quiet grey with a thin steel edge.", "#22262b", "#7d8b99", "#e6eaee", { font = "arial" })
-theme("Ember", "Charcoal brown with a glowing orange edge.", "#1a0c05", "#ff5a1f", "#ffe0cc")
-theme("Lavender Fields", "Light lilac with violet trim.", "#efe9f8", "#8a6fc4", "#2b2142")
-theme("Golden Hour", "Warm cream with amber trim.", "#f6e7bf", "#c9891a", "#3b2a08")
-theme("Toxic Waste", "Black-green with acid green trim.", "#0c1406", "#9dff1a", "#eaffc2", { font = "arial" })
-theme("Steel Blue", "Dark navy grey with steel blue trim.", "#15202c", "#4b7fb5", "#dce8f5")
-theme("Rose Gold", "Dark rosewood with a rose gold edge.", "#2a1a1c", "#e0a8a0", "#fbe9e5")
-theme("Obsidian", "Almost black with a graphite edge.", "#08080a", "#5c5c66", "#d9d9de", { font = "arial" })
-theme("Emerald City", "Deep green with a bright emerald edge.", "#06241c", "#1fcf8e", "#d6fff0")
-theme("Candy", "Pale pink with a bubblegum edge.", "#fff0f6", "#ff5fa2", "#4a1a33")
-theme("Storm Cloud", "Grey-blue with a pale blue edge.", "#2a2f38", "#8fb0d6", "#eef3fa")
-theme("Autumn Leaves", "Dark brown with a pumpkin edge.", "#2a1608", "#d9741a", "#fbe3c4")
-theme("Pine and Snow", "Snow white with pine green trim.", "#f3f7f4", "#2f6b4a", "#14291d")
-theme("Violet Ember", "Dark violet with an ember orange edge.", "#170a24", "#ff6a3d", "#f6e2ff")
-theme("Ice Cave", "Clear icy glass with a bright cyan edge.", "#0a1c26", "#8be9ff", "#e8fbff", { alpha = 0.75, style = "tip" })
-theme("Honey", "Dark amber with a honey gold edge.", "#2a1f08", "#f2b526", "#fff0c2")
-theme("Plum Wine", "Dark wine with a magenta edge.", "#240b1a", "#b03a78", "#f7dcea")
-theme("Dusty Rose", "Muted mauve with a pink edge.", "#3a2a2e", "#c98a97", "#f6e8ea")
-theme("Sandstone", "Light sand with a bronze edge.", "#e9dcc2", "#a86a2e", "#3a2612")
-theme("Deep Space", "Near-black blue with a periwinkle edge.", "#03030a", "#6a7bff", "#dfe3ff")
-theme("Aurora", "Dark teal with green lines and violet titles.", "#07181a", "#4cf0a0", "#e0fff0", { title = "#b58cff" })
-theme("Coffee House", "Espresso brown with a latte edge.", "#1e140d", "#a47148", "#f0e0d0")
-theme("Lemon Lime", "Pale lemon with a lime green edge.", "#f7fbe0", "#7cb518", "#26340a")
-theme("Crimson Knight", "Black with a bold red edge.", "#14090c", "#d41f3c", "#f5dde1", { style = "flat2" })
-theme("Teal and Orange", "Teal background with an orange edge.", "#0b2a30", "#ff8a3d", "#e0f5f5")
-theme("Graphite Mint", "Graphite grey with a mint edge.", "#1b1f1e", "#3ddc97", "#e5f0eb", { font = "arial" })
-theme("Parchment Night", "Dark old paper with a pale gold edge.", "#2a2418", "#cbb27a", "#f1e6c8")
-theme("Sky", "Light sky blue with a clear blue edge.", "#dff0fb", "#2d86c8", "#0f2f47")
-theme("Monochrome", "Black and white, nothing else.", "#111111", "#ffffff", "#eeeeee", { font = "arial" })
-theme("Bubblegum Dark", "Dark purple with a pink edge.", "#1a1020", "#ff77c8", "#ffe3f5")
-theme("Jade Temple", "Dark jade with a pale gold edge.", "#0e2a24", "#d8c37a", "#f1eddc")
-theme("Volcano", "Black with a molten red edge.", "#140606", "#ff3b1f", "#ffd9c9", { style = "flat2" })
-theme("Twilight Blue", "Evening blue with a soft blue edge.", "#121a3a", "#7fa0ff", "#e6ecff")
-theme("Terminal Amber", "Black screen with amber text, like an old terminal.", "#0a0600", "#ffb000", "#ffcf66", { font = "arial", title = "#ffb000" })
-theme("Orchid", "Pale orchid with a purple edge.", "#f6ecf8", "#b24bd1", "#38154a")
-theme("Sage", "Pale sage green with a green edge.", "#dfe6d3", "#5f7a4a", "#25301c")
+theme("Ocean Depths", "Clear sea water over a deep blue.", "#06202e", "#2aa6c9", "#d7f2fb", "glass")
+theme("Forest Canopy", "Dark leaves and soft green light.", "#0f2416", "#5fae5a", "#e3f2dc", "rustic")
+theme("Desert Dusk", "Baked brown fading into an orange glow.", "#2b1b12", "#e0914a", "#f7e3cf", "dusk")
+theme("Blood Moon", "Heavy dark iron with a crimson bar.", "#1d0606", "#c0282d", "#f3d7d7", "forge")
+theme("Royal Purple", "A formal violet frame with lilac lines.", "#1c0f2e", "#9b6bd6", "#eadcf8", "etched")
+theme("Arctic Frost", "Pale frosted glass with steel blue lines.", "#e8f2f8", "#5b9bc4", "#1c3446", "glass")
+theme("Sunset", "Dusky plum warming to coral at the bottom.", "#2b1230", "#ff7a59", "#ffe6d6", "dusk")
+theme("Moss and Stone", "Grey stone with moss-green trim.", "#20241d", "#8a9a6b", "#e4e8d8", "rustic")
+theme("Cherry Blossom", "Pink paper with a rose border.", "#fbe8ee", "#d9608a", "#4a1f2f", "paper")
+theme("Midnight Gold", "Black velvet with a gold double line.", "#0b0b14", "#d4af37", "#f4ecd0", "etched")
+theme("Copper Steam", "Riveted copper plate with a heavy top bar.", "#241710", "#c87533", "#f2dcc4", "forge")
+theme("Neon Cyber", "A cyan neon sign on black.", "#0a0a12", "#00f0ff", "#e0fbff", "neon")
+theme("Synthwave", "Hot pink neon over dark purple.", "#1a0a2e", "#ff2bd6", "#ffe0fa", "neon")
+theme("Mint Chocolate", "Chocolate brown with mint trim.", "#1f1712", "#5fd6a8", "#e6fff4", "rustic")
+theme("Slate Minimal", "Quiet grey, one thin bar, nothing else.", "#22262b", "#7d8b99", "#e6eaee", "minimal")
+theme("Ember", "Dark iron with glowing coals at the bottom.", "#1a0c05", "#ff5a1f", "#ffe0cc", "forge", { sheen = { top = 0, bot = 0.3, color = "accent" } })
+theme("Lavender Fields", "Lilac paper with a violet border.", "#efe9f8", "#8a6fc4", "#2b2142", "paper")
+theme("Golden Hour", "Cream letterhead with an amber bar.", "#f6e7bf", "#c9891a", "#3b2a08", "stationery")
+theme("Toxic Waste", "Green phosphor screen with scan lines.", "#0c1406", "#9dff1a", "#eaffc2", "terminal")
+theme("Steel Blue", "Navy grey with one steel blue bar.", "#15202c", "#4b7fb5", "#dce8f5", "minimal")
+theme("Rose Gold", "Rosewood with a fine rose gold double line.", "#2a1a1c", "#e0a8a0", "#fbe9e5", "etched")
+theme("Obsidian", "Black glass screen, faint lines.", "#08080a", "#5c5c66", "#d9d9de", "terminal", { scan = { gap = 4, a = 0.05 } })
+theme("Emerald City", "Deep green glowing emerald at the bottom.", "#06241c", "#1fcf8e", "#d6fff0", "dusk")
+theme("Candy", "Pink stationery with a bubblegum bar.", "#fff0f6", "#ff5fa2", "#4a1a33", "stationery")
+theme("Storm Cloud", "Cloud grey with one pale blue bar.", "#2a2f38", "#8fb0d6", "#eef3fa", "minimal")
+theme("Autumn Leaves", "Brown bark with pumpkin trim.", "#2a1608", "#d9741a", "#fbe3c4", "rustic")
+theme("Pine and Snow", "Snow white with a pine green bar.", "#f3f7f4", "#2f6b4a", "#14291d", "stationery")
+theme("Violet Ember", "Violet night with an orange neon glow.", "#170a24", "#ff6a3d", "#f6e2ff", "neon")
+theme("Ice Cave", "See-through ice with a bright cyan rim.", "#0a1c26", "#8be9ff", "#e8fbff", "glass", { alpha = 0.6 })
+theme("Honey", "Dark amber with golden trim.", "#2a1f08", "#f2b526", "#fff0c2", "rustic")
+theme("Plum Wine", "Wine red with a soft magenta glow.", "#240b1a", "#b03a78", "#f7dcea", "neon", { glow = { { inset = -1, a = 0.4 } } })
+theme("Dusty Rose", "Muted mauve with one rose bar.", "#3a2a2e", "#c98a97", "#f6e8ea", "minimal")
+theme("Sandstone", "Sand-coloured paper with a bronze border.", "#e9dcc2", "#a86a2e", "#3a2612", "paper")
+theme("Deep Space", "Black space with a blue horizon glow.", "#03030a", "#6a7bff", "#dfe3ff", "dusk", { sheen = { top = 0, bot = 0.4, color = "accent" } })
+theme("Aurora", "Green-lit glass with violet titles.", "#07181a", "#4cf0a0", "#e0fff0", "glass", { title = "#b58cff", alpha = 0.7 })
+theme("Coffee House", "Espresso wood with latte trim.", "#1e140d", "#a47148", "#f0e0d0", "rustic")
+theme("Lemon Lime", "Lemon paper with a lime bar.", "#f7fbe0", "#7cb518", "#26340a", "stationery")
+theme("Crimson Knight", "Black armour plate with a bold red bar.", "#14090c", "#d41f3c", "#f5dde1", "forge")
+theme("Teal and Orange", "Teal panel with one orange bar.", "#0b2a30", "#ff8a3d", "#e0f5f5", "minimal")
+theme("Graphite Mint", "Graphite screen with mint text.", "#1b1f1e", "#3ddc97", "#e5f0eb", "terminal")
+theme("Parchment Night", "Old paper by candlelight, double gold line.", "#2a2418", "#cbb27a", "#f1e6c8", "etched")
+theme("Sky", "Bright morning glass.", "#dff0fb", "#2d86c8", "#0f2f47", "glass", { alpha = 0.8 })
+theme("Monochrome", "Black and white screen, tight scan lines.", "#111111", "#ffffff", "#eeeeee", "terminal", { scan = { gap = 2, a = 0.08 } })
+theme("Bubblegum Dark", "Dark purple with a pink neon sign.", "#1a1020", "#ff77c8", "#ffe3f5", "neon")
+theme("Jade Temple", "Dark jade with a gold double line.", "#0e2a24", "#d8c37a", "#f1eddc", "etched")
+theme("Volcano", "Black rock with molten red at the base.", "#140606", "#ff3b1f", "#ffd9c9", "forge", { sheen = { top = 0, bot = 0.35, color = "accent" } })
+theme("Twilight Blue", "Evening blue with a soft glow at the bottom.", "#121a3a", "#7fa0ff", "#e6ecff", "dusk")
+theme("Terminal Amber", "Amber screen like an old terminal.", "#0a0600", "#ffb000", "#ffcf66", "terminal", { title = "#ffb000" })
+theme("Orchid", "Pale orchid paper with a purple border.", "#f6ecf8", "#b24bd1", "#38154a", "paper")
+theme("Sage", "Sage paper with a green border.", "#dfe6d3", "#5f7a4a", "#25301c", "paper")
 
 -- Number of each theme (its place in the list). Skins.label(id) = "[7] Ocean Depths".
 Skins.number = {}
@@ -205,7 +417,7 @@ end
 -- Sets a font, and falls back to the game's default font if the skin's font can't load.
 function Skins.setFont(fs, skin, size)
   if type(fs) ~= "table" or not fs.SetFont then return end
-  local ok = pcall(fs.SetFont, fs, skin.font, size or skin.size, "")
+  local ok = pcall(fs.SetFont, fs, skin.font, size or skin.size, skin.flags or "")
   local f = fs.GetFont and fs:GetFont()
   if not ok or not f then pcall(fs.SetFont, fs, FRIZ, size or skin.size, "") end
   -- The game's default text has a black shadow. It looked like blur (on Parchment most), so it is off in every skin.
@@ -220,11 +432,12 @@ function Skins.setTextColor(fs, c)
 end
 
 -- Paints a frame made with BackdropTemplate.
-function Skins.paintFrame(f, skin)
+function Skins.paintFrame(f, skin, small)
   if not f.SetBackdrop then return end
   f:SetBackdrop(skin.frame)
   color(f.SetBackdropColor, f, skin.frameBg)
   color(f.SetBackdropBorderColor, f, skin.frameBorder)
+  Skins.decorate(f, skin, small)
 end
 
 -- Paints a button (BackdropTemplate + a font string in b.label).
@@ -241,6 +454,7 @@ function Skins.paintButton(b, skin, style, size)
     Skins.setFont(b.label, skin, size)
     Skins.setTextColor(b.label, style.text)
   end
+  buttonDeco(b, style)
 end
 
 function Skins.hookHover(b)
