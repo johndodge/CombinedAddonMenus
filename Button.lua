@@ -22,7 +22,7 @@ local function place()
   if p then
     btn:SetPoint(p[1], UIParent, p[2], p[3], p[4])
   elseif Minimap then
-    btn:SetPoint("TOPRIGHT", Minimap, "BOTTOMLEFT", 4, 4)
+    btn:SetPoint("TOPRIGHT", Minimap, "BOTTOMLEFT", 16, 16)
   else
     btn:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -220, -200)
   end
