@@ -1,6 +1,6 @@
 -- Combined Addon Menus - ten more skins (0.3.37), designed by an Opus agent from the skin rules alone.
 -- Loaded after Skins.lua. Each one is a full table (no theme() helper). Numbers continue after the skins in Skins.lua.
--- Extra (below) adds two drawing parts the first skins did not need: deco.margin and deco.shadow.
+-- Extra (below) adds one drawing part the first skins did not need: deco.margin (Ledger).
 
 local ADDON, ns = ...
 local Skins = ns.Skins
@@ -14,12 +14,6 @@ local Skins = ns.Skins
 --     spec = { x = px from the left edge, th = line width, gap = px between two
 --              lines (omit for one line), inset = px kept clear at top and
 --              bottom, a = alpha, color = colour name }
---
---   deco.shadow  (used by: Toybox at full strength, Broadsheet soft)
---     A hard drop shadow offset down and right, with no blur. Drawn as two
---     strips OUTSIDE the frame (right side and bottom), so it stays correct
---     under a see-through frame and does not depend on layer order.
---     spec = { x = px right (> 0), y = px down (< 0), a = alpha, color = name }
 --
 -- Colour names follow the existing deco rule: "white", "black", "accent",
 -- or nil for the frame border colour.
@@ -77,38 +71,18 @@ function Extra.margin(frame, spec, skin)
 	end
 end
 
-function Extra.shadow(frame, spec, skin)
-	local r, g, b = rgb(skin, spec.color or "black")
-	local a = spec.a or 1
-	local x = spec.x or 4
-	local y = spec.y or -4
-	-- Right strip: beside the frame, from y below its top down to y below its bottom.
-	local right = tex(frame, "shadowR", "BACKGROUND", -8)
-	right:SetColorTexture(r, g, b, a)
-	right:SetPoint("TOPLEFT", frame, "TOPRIGHT", 0, y)
-	right:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", x, y)
-	-- Bottom strip: under the frame, from x right of its left edge to its right edge.
-	local bottom = tex(frame, "shadowB", "BACKGROUND", -8)
-	bottom:SetColorTexture(r, g, b, a)
-	bottom:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", x, 0)
-	bottom:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, y)
-end
-
 function Extra.apply(frame, skin, small)
 	Extra.hide(frame)
 	local d = skin.deco
 	if not d then return end
 	if d.margin and not small then Extra.margin(frame, d.margin, skin) end
-	if d.shadow then Extra.shadow(frame, d.shadow, skin) end
 end
 
 -- new_skins.lua: ten window skins for Combined Addon Menus.
 -- Returns an array of skin tables. Colours are {r,g,b} or {r,g,b,a}, 0..1.
 --
 -- Two skins use decorations that are not in the engine yet (see
--- engine_additions.lua): deco.margin (Ledger) and deco.shadow (Toybox,
--- Broadsheet). An engine without them simply skips those keys; the skin
--- still draws, it only loses that one touch.
+-- engine_additions.lua): deco.margin (Ledger).
 --
 -- Button styles with "no border" use a 1px edge with a fully clear border
 -- colour, so they look the same whether the engine treats a nil border as
@@ -205,73 +179,6 @@ local NEW = {
 		},
 	},
 
-	---------------------------------------------------------------- 3
-	{
-		name = "Amber Monitor",
-		desc = "A 1980s amber phosphor terminal: black glass, glowing letters and scan lines.",
-		logo = "classic",
-		font = ARIALN, flags = "MONOCHROME", size = 13, titleSize = 15, pad = 12,
-		frame = flat(2),
-		frameBg     = { 0.04, 0.03, 0.01, 0.97 },
-		frameBorder = { 0.62, 0.38, 0.03, 1 },
-		title  = { 1.00, 0.76, 0.22 },
-		text   = { 1.00, 0.69, 0.00 },
-		muted  = { 0.74, 0.50, 0.06 },
-		line   = { 0.62, 0.38, 0.03, 0.45 },
-		accent = { 1.00, 0.62, 0.00 },
-		button = {
-			backdrop = flat(1), bg = clear(), border = { 0.85, 0.55, 0.05, 1 },
-			hover = { 0.40, 0.24, 0.00, 1 },
-			text = { 1.00, 0.72, 0.10 },
-		},
-		input = {
-			backdrop = flat(1), bg = { 0, 0, 0, 1 }, border = { 0.62, 0.38, 0.03, 1 },
-			hover = { 0.12, 0.07, 0.00, 1 },
-			text = { 1.00, 0.69, 0.00 },
-		},
-		deco = {
-			inner = { inset = 5, th = 1, a = 0.35, color = "accent" },       -- tube bezel
-			glow  = {                                                        -- phosphor bloom
-				{ inset = -1, a = 0.45, color = "accent" },
-				{ inset = -2, a = 0.22, color = "accent" },
-				{ inset = -3, a = 0.10, color = "accent" },
-			},
-			sheen = { top = 0.07, bot = 0, color = "white" },               -- curved glass catching light
-			scan  = { gap = 3, a = 0.35 },
-		},
-	},
-
-	---------------------------------------------------------------- 4
-	{
-		name = "Blueprint",
-		desc = "A draftsman's cyanotype: white ink lines on blue, with registration marks at the corners.",
-		logo = "classic",
-		font = ARIALN, flags = "", size = 13, titleSize = 16, pad = 14,
-		frame = flat(1),
-		frameBg     = { 0.09, 0.27, 0.55, 1 },
-		frameBorder = { 0.85, 0.92, 1.00, 0.90 },
-		title  = { 1.00, 1.00, 1.00 },
-		text   = { 0.93, 0.96, 1.00 },
-		muted  = { 0.72, 0.82, 0.95 },
-		line   = { 0.85, 0.92, 1.00, 0.30 },
-		accent = { 0.70, 0.90, 1.00 },
-		button = {
-			backdrop = flat(1), bg = clear(), border = { 0.85, 0.92, 1.00, 0.85 },
-			hover = { 1, 1, 1, 0.16 },
-			text = { 1.00, 1.00, 1.00 },
-		},
-		input = {
-			backdrop = flat(1), bg = { 0.05, 0.18, 0.40, 1 }, border = { 0.85, 0.92, 1.00, 0.60 },
-			hover = { 0.07, 0.22, 0.47, 1 },
-			text = { 1.00, 1.00, 1.00 },
-		},
-		deco = {
-			inner   = { inset = 4, th = 1, a = 0.40, color = "white" },             -- drawing border
-			corners = { kind = "bracket", inset = 4, len = 16, th = 2, color = "white" }, -- registration marks
-			scan    = { gap = 12, a = 0.12 },                                      -- faint ruled grid
-		},
-	},
-
 	---------------------------------------------------------------- 5
 	{
 		name = "Smoked Glass",
@@ -341,37 +248,6 @@ local NEW = {
 		},
 	},
 
-	---------------------------------------------------------------- 7
-	{
-		name = "Toybox",
-		desc = "A chunky plastic toy: primary colours, fat black outlines and a cartoon shadow.",
-		logo = "classic",
-		font = FRIZ, flags = "THICKOUTLINE", size = 13, titleSize = 18, pad = 14,
-		frame = flat(4),
-		frameBg     = { 0.10, 0.32, 0.78, 1 },
-		frameBorder = { 0, 0, 0, 1 },
-		title  = { 1.00, 0.86, 0.12 },
-		text   = { 1.00, 1.00, 1.00 },
-		muted  = { 0.85, 0.92, 1.00 },
-		line   = { 0, 0, 0, 0.40 },
-		accent = { 1.00, 0.84, 0.08 },
-		button = {
-			backdrop = flat(2), bg = { 0.84, 0.12, 0.10, 1 }, border = { 0, 0, 0, 1 },
-			hover = { 0.62, 0.07, 0.05, 1 },            -- pressed-in darker red
-			text = { 1.00, 1.00, 1.00 },
-			bevel = true,
-		},
-		input = {
-			backdrop = flat(2), bg = { 0.03, 0.12, 0.36, 1 }, border = { 0, 0, 0, 1 },
-			hover = { 0.05, 0.17, 0.46, 1 },
-			text = { 1.00, 1.00, 1.00 },
-		},
-		deco = {
-			bar    = { h = 5, inset = 4, color = "accent" },               -- yellow top stripe
-			shadow = { x = 5, y = -5, a = 1, color = "black" },            -- NEW: hard offset shadow
-		},
-	},
-
 	---------------------------------------------------------------- 8
 	{
 		name = "Warpaint",
@@ -407,74 +283,6 @@ local NEW = {
 		},
 	},
 
-	---------------------------------------------------------------- 9
-	{
-		name = "Moonweave",
-		desc = "Night-elf silk under the moon: sheer indigo, silver filigree and a faint blue halo.",
-		logo = "classic",
-		font = FRIZ, flags = "", size = 12, titleSize = 16, pad = 14,
-		frame = {
-			bgFile = TIP_BG, edgeFile = TIP_EDGE, tile = true, tileSize = 16, edgeSize = 12,
-			insets = { left = 3, right = 3, top = 3, bottom = 3 },
-		},
-		frameBg     = { 0.07, 0.07, 0.18, 0.88 },
-		frameBorder = { 0.78, 0.82, 0.95, 1 },
-		title  = { 0.85, 0.88, 1.00 },
-		text   = { 0.88, 0.89, 0.95 },
-		muted  = { 0.72, 0.74, 0.88 },
-		line   = { 0.78, 0.82, 0.95, 0.14 },
-		accent = { 0.60, 0.70, 1.00 },
-		button = {
-			backdrop = flat(1), bg = { 1, 1, 1, 0.03 }, border = clear(),
-			hover = { 0.60, 0.70, 1.00, 0.16 },
-			text = { 0.85, 0.88, 1.00 },
-			underline = { 0.60, 0.70, 1.00, 0.70 },
-		},
-		input = {
-			backdrop = flat(1), bg = { 0, 0, 0, 0.25 }, border = clear(),
-			hover = { 0, 0, 0, 0.35 },
-			text = { 0.88, 0.89, 0.95 },
-			underline = { 0.78, 0.82, 0.95, 0.60 },
-		},
-		deco = {
-			inner = { inset = 7, th = 1, a = 0.18, color = "white" },        -- fine filigree thread
-			sheen = { top = 0.16, bot = 0, color = "accent" },              -- moonlight from above
-			glow  = {
-				{ inset = -1, a = 0.30, color = "accent" },
-				{ inset = -2, a = 0.12, color = "accent" },
-			},
-		},
-	},
-
-	---------------------------------------------------------------- 10
-	{
-		name = "Broadsheet",
-		desc = "A morning newspaper: grey newsprint under a black masthead rule, with reversed-out buttons.",
-		logo = "classic",
-		font = FRIZ, flags = "", size = 12, titleSize = 18, pad = 12,
-		frame = flat(1),
-		frameBg     = { 0.91, 0.90, 0.87, 1 },
-		frameBorder = { 0.10, 0.10, 0.10, 1 },
-		title  = { 0.00, 0.00, 0.00 },
-		text   = { 0.08, 0.08, 0.08 },
-		muted  = { 0.34, 0.34, 0.32 },
-		line   = { 0.10, 0.10, 0.10, 0.45 },
-		accent = { 0.06, 0.06, 0.06 },
-		button = {
-			backdrop = flat(1), bg = { 0.10, 0.10, 0.10, 1 }, border = { 0, 0, 0, 1 },
-			hover = { 0.30, 0.30, 0.29, 1 },
-			text = { 0.97, 0.96, 0.93 },
-		},
-		input = {
-			backdrop = flat(1), bg = { 0.98, 0.97, 0.95, 1 }, border = { 0.10, 0.10, 0.10, 1 },
-			hover = { 1, 1, 1, 1 },
-			text = { 0.05, 0.05, 0.05 },
-		},
-		deco = {
-			bar    = { h = 6, inset = 1, color = "accent" },               -- masthead rule
-			shadow = { x = 3, y = -3, a = 0.30, color = "black" },         -- NEW: paper lying on a desk
-		},
-	},
 }
 
 Skins.extra = Extra

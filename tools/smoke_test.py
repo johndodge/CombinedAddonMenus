@@ -485,7 +485,7 @@ def main():
     order = ns.Skins.order
     for i in range(1, len(order) + 1):
         ns.Skins.set(order[i])
-    check(len(order) == 19, "there must be 19 skins (3 originals + 6 themes + 10 designed)")
+    check(len(order) == 14, "there must be 14 skins (3 originals + 6 themes + 5 designed)")
     ns.Skins.set("classic")
     check(mbtn is not None and mbtn.shown, "the M button must exist and show at login")
     if mbtn is not None:
