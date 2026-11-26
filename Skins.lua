@@ -156,15 +156,22 @@ function Skins.decorate(f, skin, small)
     for i, g in ipairs(cfg.glow) do dbox(f, "glow" .. i, skin, g.inset, 1, g.color or "accent", g.a) end
   end
   -- gradient
+  -- If the frame has a scrolling area (f.sheenHost = its scroll child), the gradient is drawn on that area, so it
+  -- scrolls with the content: an item keeps its place in the gradient. Otherwise it is drawn on the frame.
+  local host = f.sheenHost
+  dhide(f, "sheen")
+  if host then dhide(host, "sheen") end
   if cfg.sheen then
-    local t = dtex(f, "sheen")
+    local target = host or f
+    local o = host and 0 or 2
+    local t = dtex(target, "sheen")
     t:ClearAllPoints()
-    t:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
-    t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+    t:SetPoint("TOPLEFT", target, "TOPLEFT", o, -o)
+    t:SetPoint("BOTTOMRIGHT", target, "BOTTOMRIGHT", -o, o)
     local r, g, b = dcolor(skin, cfg.sheen.color, 1)
     gradient(t, { r, g, b, cfg.sheen.top }, { r, g, b, cfg.sheen.bot })
     t:Show()
-  else dhide(f, "sheen") end
+  end
   -- corners, top bar and scan lines are left off small frames (the drop-down)
   dhide(f, "corner")
   if cfg.corners and not small then

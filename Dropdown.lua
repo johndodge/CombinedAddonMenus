@@ -77,6 +77,7 @@ local function level(i)
   f.body = CreateFrame("Frame", nil, f.scroll)
   f.body:SetSize(10, 10)
   f.scroll:SetScrollChild(f.body)
+  f.sheenHost = f.body   -- the skin's gradient scrolls with the rows
   f.scroll:EnableMouseWheel(true)
   -- Smooth scrolling: the wheel moves a target spot, and every frame the list glides a share of the way there.
   f.target = 0

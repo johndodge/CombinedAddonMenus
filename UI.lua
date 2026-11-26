@@ -620,7 +620,8 @@ function UI.layout()
       y = y + h
     end
   end
-  content:SetHeight(math.max(y, 1))
+  -- At least as tall as the visible area, so the skin's gradient always fills it.
+  content:SetHeight(math.max(y, (scroll:GetHeight() or 0), 1))
   if nRow == 0 then
     emptyText:SetText(#rows == 0 and "No addon menus found. Type /cam debug and send the result to the addon author."
       or "No addon matches your search.")
@@ -816,6 +817,7 @@ local function create()
   content = CreateFrame("Frame", nil, scroll)
   content:SetSize(contentW, 1)
   scroll:SetScrollChild(content)
+  frame.sheenHost = content   -- the skin's gradient is drawn on the scrolling content
 
   emptyText = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   emptyText:SetPoint("TOP", scroll, "TOP", 0, -30)
