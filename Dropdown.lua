@@ -115,6 +115,17 @@ local function makeRow(f)
   b.label:SetPoint("LEFT", 8, 0)
   b.label:SetPoint("RIGHT", -16, 0)
   b.label:SetJustifyH("LEFT")
+  -- Separator at the bottom edge: a dark line with a faint light line under it, so it looks pressed into the menu.
+  b.sepDark = b:CreateTexture(nil, "ARTWORK")
+  b.sepDark:SetTexture(WHITE)
+  b.sepDark:SetPoint("BOTTOMLEFT", 6, 1)
+  b.sepDark:SetPoint("BOTTOMRIGHT", -6, 1)
+  b.sepDark:SetHeight(1)
+  b.sepLight = b:CreateTexture(nil, "ARTWORK")
+  b.sepLight:SetTexture(WHITE)
+  b.sepLight:SetPoint("BOTTOMLEFT", 6, 0)
+  b.sepLight:SetPoint("BOTTOMRIGHT", -6, 0)
+  b.sepLight:SetHeight(1)
   b.arrow = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   b.arrow:SetPoint("RIGHT", -5, 0)
   b.arrow:SetText(">")
@@ -140,6 +151,10 @@ local function paintRow(b, skin)
     text = skin.text,
   }
   ns.Skins.paintButton(b, skin, style)
+  if b.sepDark.SetColorTexture then
+    b.sepDark:SetColorTexture(0, 0, 0, 0.35)
+    b.sepLight:SetColorTexture(1, 1, 1, 0.12)
+  end
   ns.Skins.setFont(b.arrow, skin)
   ns.Skins.setTextColor(b.arrow, skin.muted)
 end
@@ -169,6 +184,8 @@ function Dropdown.open(anchor, entries, depth)
     paintRow(r, skin)
     r:SetLabel(e.text or "")
     r.arrow:SetShown(e.children and true or false)
+    r.sepDark:SetShown(i < #entries)
+    r.sepLight:SetShown(i < #entries)
     r:Show()
     measure:SetText(e.text or "")
     local w = measure:GetStringWidth() or 0

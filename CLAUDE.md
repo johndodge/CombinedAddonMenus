@@ -66,6 +66,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (updated 2026-11-26; newest first; current version is the `## Version:` line in the .toc, 0.3.26 pushed and tagged)
 
+- 0.3.33 (2026-11-26, user request): each drop-down row has a separator at its bottom edge (1 px dark line over a 1 px faint light line, so it looks pressed in; not on the last row). Colours are fixed black/white at low alpha, in `paintRow`. Not yet tried in game.
 - 0.3.32 (2026-11-26, user report: a few lines of white space at the bottom of the scrolled drop-down): the scroll limit is now worked out in Dropdown.lua (`scrollRange` = content height minus visible height) instead of read from the game's `GetVerticalScrollRange`. Cause is a guess (the game's answer may be too large or lag a frame). Not yet tried in game.
 - 0.3.31 (2026-11-26, user request): each wheel notch moves two rows (44 px) again, with the smooth glide kept. User said the 0.3.30 glide "feels great". Not yet tried in game.
 - 0.3.30 (2026-11-26, user request): the drop-down scrolls smoothly: the wheel sets a target (`f.target`) and an OnUpdate glides to it (`SMOOTH` = 16 in Dropdown.lua; higher is snappier). Not yet tried in game.
