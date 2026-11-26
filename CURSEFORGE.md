@@ -23,7 +23,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
   - **Parchment:** light paper, dark ink, the game's sharp serif font
   - **Fel Terminal:** black screen with neon green text
   - **Frostglass:** smoky icy blue glass
-- **Small menu button.** Click it for a drop-down of your addons. Point at an addon to see its buttons. Ctrl-click it to open the big list. Right-click it to open the settings. Hold **Alt** and drag it to move it. You can hide it from the settings page.
+- **Small menu button.** Click it for a drop-down of your addons, in your chosen skin. Scroll it with the mouse wheel. Point at an addon to see its buttons. Ctrl-click it to open the big list. Right-click it to open the settings. Hold **Alt** and drag it to move it. You can hide it from the settings page.
 - **Search box** to filter the list by addon name or button name.
 - **Keybinding** under Key Bindings > AddOns.
 
@@ -52,6 +52,12 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/cam debug`.
 
 ## Version history
+
+**0.3.33**
+- Fixed an error when clicking the menu button ("attempt to perform arithmetic on local 'scrollBarWidth'").
+- The drop-down is now drawn by the addon itself. It scrolls smoothly with the mouse wheel, so a long list of addons stays short on screen.
+- The drop-down uses your chosen skin and has a thin line between entries.
+- Clicking outside the drop-down or pressing Esc closes it.
 
 **0.3.26**
 - The menu button now starts a little closer to the minimap (a button you moved yourself stays where it is).
