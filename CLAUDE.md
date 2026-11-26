@@ -66,6 +66,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (updated 2026-11-26; newest first; current version is the `## Version:` line in the .toc, 0.3.26 pushed and tagged)
 
+- 0.3.31 (2026-11-26, user request): each wheel notch moves two rows (44 px) again, with the smooth glide kept. User said the 0.3.30 glide "feels great". Not yet tried in game.
 - 0.3.30 (2026-11-26, user request): the drop-down scrolls smoothly: the wheel sets a target (`f.target`) and an OnUpdate glides to it (`SMOOTH` = 16 in Dropdown.lua; higher is snappier). Not yet tried in game.
 - 0.3.29 (2026-11-26, user request): the drop-down scrolls one row (22 px) per mouse-wheel notch, was two rows. User said the 0.3.28 menu "looks good". Not yet tried in game.
 - 0.3.28 (2026-11-26, user choice after an Opus review): the drop-down is now our own (`Dropdown.lua`), so it scrolls (400 px) without any game menu code. Reason: `SetScrollMode` on the game's menu made it do math on a secret `scrollBarWidth` under our taint. ForeverCore's own menu (GPL) was only studied, not copied. Smoke test passes (mock rows and side menu); not yet tried in game.

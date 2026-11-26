@@ -74,7 +74,7 @@ local function level(i)
   f.target = 0
   f.scroll:SetScript("OnMouseWheel", function(self, delta)
     local range = self:GetVerticalScrollRange() or 0
-    f.target = math.max(0, math.min(range, (f.target or self:GetVerticalScroll()) - delta * ROW))
+    f.target = math.max(0, math.min(range, (f.target or self:GetVerticalScroll()) - delta * ROW * 2))
   end)
   f.scroll:SetScript("OnUpdate", function(self, elapsed)
     local target = f.target
