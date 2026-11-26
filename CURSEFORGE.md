@@ -14,7 +14,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
 - **Every button works in one click.** Slash command buttons run the command for you. Right-click a button to get that addon's right-click action.
 - **Takes you back to the list.** Close a settings page you opened from the list, and you return to the list, not the game menu. Press Esc in a window you opened from the list, and only that window closes.
 - **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and joins them into one button. The button shows every name, for example `Minimap = /ttwin`, and it tells you in chat when it does this. Shift-click a combined button to split it again, or type `/cam reset` to split all of them.
-- **Clean up your minimap.** Hide other addons' minimap icons (any addon that uses LibDBIcon) from the settings page. You can still open those addons from the list.
+- **Clean up your minimap.** Other addons' minimap icons are hidden by default. Tick the ones you want to see on the settings page, or use Select all / Deselect all. You can still open those addons from the list.
 - **Blacklist.** Hide addons you never want to see in the list.
 - **Six skins.** Each skin has its own logo. A live preview on the settings page shows each skin before you pick it.
   - **Classic:** the game's dialog look, with gold text
@@ -52,6 +52,11 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/cam debug`.
 
 ## Version history
+
+**0.3.24**
+- Other addons' minimap icons are now hidden by default. Tick the ones you want to keep.
+- New Select all and Deselect all buttons for the minimap icon list.
+- Finds minimap buttons that do not use the shared icon library (Spy, X-Perl, BuffRadar, Lore Forever). They get a Minimap button in the list.
 
 **0.3.20**
 - The small square button is now called the menu button, because its new picture is not an M.
