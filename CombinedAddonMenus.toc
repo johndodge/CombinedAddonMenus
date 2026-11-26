@@ -2,7 +2,7 @@
 ## Title: Combined Addon Menus
 ## Author: Tieme
 ## Notes: One list of all your addons, with a button for each way to open their menus. Type /cam.
-## Version: 0.3.36
+## Version: 0.3.37
 ## SavedVariables: CombinedAddonMenusDB
 ## IconTexture: Interface\AddOns\CombinedAddonMenus\media\Icon
 ## AddonCompartmentFunc: CombinedAddonMenus_OnCompartmentClick
@@ -10,6 +10,7 @@
 
 Extras.lua
 Skins.lua
+Skins2.lua
 Scan.lua
 UI.lua
 Dropdown.lua

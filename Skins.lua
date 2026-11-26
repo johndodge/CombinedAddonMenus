@@ -200,6 +200,7 @@ function Skins.decorate(f, skin, small)
     f._deco = {}
     scanLines(f, skin, cfg.scan)
   end
+  if Skins.extra then Skins.extra.apply(f, skin, small) end
   if not f._decoHooked and f.HookScript then
     f._decoHooked = true
     f:HookScript("OnSizeChanged", function(self)
