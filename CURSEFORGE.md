@@ -8,7 +8,7 @@ Some addons hide their options behind a slash command. Others put them on a mini
 
 - **Finds menus automatically.** No setup and no list to keep up to date. It finds:
   - addon settings pages in Options > AddOns
-  - minimap buttons (LibDataBroker launchers)
+  - minimap buttons (LibDataBroker launchers, and addons that make their own button)
   - minimap dropdown entries (the Addon Compartment)
   - slash commands, sorted under the addon that owns them
 - **Every button works in one click.** Slash command buttons run the command for you. Right-click a button to get that addon's right-click action.
@@ -45,7 +45,7 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 
 - Made and tested on **WoW Forever**.
 - Settings pages can't open during combat. This is a limit set by the game.
-- Minimap buttons that don't use LibDataBroker are not found.
+- Minimap buttons that another addon has gathered into its own bar are not found.
 
 ## Feedback
 

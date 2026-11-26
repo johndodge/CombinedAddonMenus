@@ -7,11 +7,11 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - `FINDINGS.md`: what the client supports, proved by in-game probes on 2026-11-20. Read it before changing the scan code.
 - **The repo root IS the addon** (changed 2026-11-21 so CurseForge's automatic packaging finds the `.toc` in the root). `.pkgmeta` sets `package-as: CombinedAddonMenus` and ignores `CLAUDE.md`, `CURSEFORGE.md`, `FINDINGS.md`, `PLAN.md`, `tools`, `dist`. Anything new that must not ship goes in the `.pkgmeta` ignore list. Older notes below that say `addon/CombinedAddonMenus/` mean the repo root.
   - `CombinedAddonMenus.toc`: `## Interface: 16001` only (WoW Forever = 1.60.1). Changed 2026-11-22: CurseForge copies this line into the file's game versions, and the user wants Forever only for now. Retail numbers (12.1.5 = 120105, 12.1.7 = 120107) can be added back later.
-  - `Scan.lua`: finds the menus. Four sources: Settings pages, Addon Compartment (minimap dropdown), LibDataBroker launchers (minimap buttons), slash commands.
+  - `Scan.lua`: finds the menus. Five sources: Settings pages, Addon Compartment (minimap dropdown), LibDataBroker launchers (minimap buttons), loose minimap buttons (since 0.3.23: addons that make their own button without LibDBIcon, e.g. Spy, X-Perl, BuffRadar, Lore Forever; found by `Options.looseButtons`), slash commands.
   - `Skins.lua`: six skins (Classic, Gnomish Workshop, Midnight, Parchment, Fel Terminal, Frostglass) and the paint helpers.
   - `UI.lua`: the list window (custom BackdropTemplate frame, painted by the skin).
-  - `Button.lua`: the small square menu button (called the "M button" before 0.3.20; the picture is no longer an M). Click = list, right-click = settings page, Alt+drag = move.
-  - `Options.lua`: the settings page (ESC > Options > AddOns > Combined Addon Menus): skin, menu button, other addons' minimap icons, blacklist.
+  - `Button.lua`: the small square menu button (called the "M button" before 0.3.20; the picture is no longer an M). Click = drop-down of every addon with its buttons in a side menu (`Button.showMenu`, since 0.3.25), Ctrl-click = the big list, right-click = settings page, Alt+drag = move.
+  - `Options.lua`: the settings page (ESC > Options > AddOns > Combined Addon Menus): skin, menu button, other addons' minimap icons (all hidden by default since 0.3.23; saved as `shownIcons`; Select all / Deselect all; also finds loose buttons, skipping map pins by size, position on the minimap ring and shared-name pools), blacklist.
   - `Core.lua`: `/cam` (user dropped `/mods` 2026-11-20 as too generic), keybinding, saved settings defaults, start-up.
   - `media/Icon.tga` (64x64) and `media/Logo_*.tga` (128x128): since 0.3.19 all seven are the user's own picture (from `Pictures/Untitled.png`, 80x82, padded to square). `tools/make_icon.py` still makes the old gold M: do NOT rerun it, it overwrites them.
   - `Extras.lua`: the user's own hand-made entries and hide list. The only file meant for hand edits per user.
@@ -30,10 +30,11 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ### Tag format (user chose option A, 2026-11-22)
 
-- Tag name: `CombinedAddonMenus-<version>-beta`, for example `CombinedAddonMenus-0.3.23-beta`. CurseForge copies the tag name into the file's display name, so this matches the old manual names (`CombinedAddonMenus-0.3.18.zip`). Not yet checked on CurseForge: the first tag in this format shows whether it works.
+- Tag name: `CombinedAddonMenus-<version>-beta`, for example `CombinedAddonMenus-0.3.23-beta`. CurseForge copies the tag name into the file's display name, so this matches the old manual names (`CombinedAddonMenus-0.3.18.zip`).
 - A tag containing `beta` makes a beta file, `alpha` an alpha file, anything else a release. Keep `-beta` until the user wants a full release.
 - Tags `v0.3.18-beta` to `v0.3.22-beta` used the old `v` format and show as `v0.3.22-beta` on CurseForge. They stay as they are.
 - Commit, then `git push`, then `git tag <name>`, then `git push origin <name>`. The tag push is what CurseForge builds from.
+- Checked 2026-11-25: this tag format works on CurseForge (`CombinedAddonMenus-0.3.26-beta` showed as a B file). Each plain push to `main` also made an extra alpha (A) file named like `CombinedAddonMenus-0.3.24-beta-3-g2ed6ebd`. The user then found a CurseForge project setting to build only tagged releases (user's word, 2026-11-25; not yet confirmed by a later push). Release flow is unchanged. Old alpha files can be deleted in the author console.
 
 ### CurseForge automatic packaging: how it is set up and what went wrong (2026-11-22)
 
@@ -48,7 +49,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - 2026-11-22: the small square button is the "menu button" in all player text, because its picture is no longer an M. The saved setting key `button` keeps its name so saved positions survive.
 - 2026-11-22: game versions are WoW Forever only (`## Interface: 16001`).
 - 2026-11-22: releases are beta tags in the format above.
-- Published on CurseForge under the **MIT** license, author **Tieme** (`addon/CombinedAddonMenus/LICENSE.txt`, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`.
+- Published on CurseForge under the **MIT** license, author **Tieme** (`LICENSE.txt` in the repo root, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`.
 
 - Name: **Combined Addon Menus** (folder `CombinedAddonMenus`).
 - Automatic scan plus a small hand-made list for gaps.
@@ -61,7 +62,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - The chat box cuts `/run` lines at 255 characters.
 - Settings pages: owner = name match, else the stack owner for pages registered after load, else `issecurevariable(category, "name")` (the addon whose code made the page). The taint method is a guess until tested in game. `/cam debug` prints what each source found and saves it to `WTF\Account\TIEME\SavedVariables\CombinedAddonMenus.lua` (written on `/reload`), because the user can't copy text out of the chat window.
 
-## Status (2026-11-21)
+## Status (updated 2026-11-26; newest first; current version is the `## Version:` line in the .toc, 0.3.26 pushed and tagged)
 
 - 0.3.26 (2026-11-25, user request): default menu button spot moved 12 px up and right (offset 4,4 -> 16,16 from the minimap's bottom-left corner). A position the user saved by moving it is unchanged.
 - 0.3.25 (2026-11-25, user request): the menu button's plain click now opens a drop-down (`Button.showMenu`, game's `MenuUtil.CreateContextMenu`): one entry per addon row, pointing at it shows that addon's buttons in a side menu (scrolls at 500 px). Ctrl-click opens the big list; right-click settings and Alt+drag unchanged. Keybinding and minimap-dropdown entry still open the big list. If `MenuUtil` is missing the list opens instead. Smoke test passes (mock menu); not yet tried in game.
@@ -87,9 +88,9 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - 0.3.8: Frostglass more opaque and darker (frame alpha 0.3 -> 0.58); Parchment uses Friz Quadrata (Morpheus looked blurry); the combined-button joiner is back to " = ".
 - 0.3.1 (user request): buttons that open the same thing are now ONE button, labelled with all names ("Minimap = /ttwin"; `action.display`). The joiner is " = ": tried and dropped were "||" (low in the game font), "-" (too small) and an em dash. Tooltip lists them; Shift-click splits them. Long labels are cut to the row width.
 88`; a pipe looked low in the game font, a hyphen too small). Tooltip lists them; Shift-click splits them. Long labels are cut to the row width.
-- 0.3.0: renamed (user request). Folder `CombinedAddonMenus`, saved variable `CombinedAddonMenusDB` (old settings were not carried over), command `/cam`. The project folder on disk is still named `ModMenuMod`. The junction `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` now points to `addon\CombinedAddonMenus` (user approved 2026-11-21). Git repo (`main`) pushed to the private GitHub repo `johndodge/CombinedAddonMenus`.
+- 0.3.0: renamed (user request). Folder `CombinedAddonMenus`, saved variable `CombinedAddonMenusDB` (old settings were not carried over), command `/cam`. The project folder on disk is still named `ModMenuMod`. The junction `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` now points to `addon\CombinedAddonMenus` (user approved 2026-11-21). Git repo (`main`) pushed to the GitHub repo (public since later) `johndodge/CombinedAddonMenus`.
 
-- Version 0.3.18. `tools/smoke_test.py` passes against the mock.
+- `tools/smoke_test.py` passes against the mock (last run 0.3.26). Its mock needs `MenuUtil`, `Minimap` and `issecurevariable` stand-ins for the menu and loose-button tests; they are set up inside the test.
 - 0.2.3 (user report: buttons hidden as duplicates when they did different things, often slash commands that show nothing or need a value): duplicate learning is stricter.
   - Shared windows never count (`SHARED` in UI.lua: StaticPopup, ScriptErrors, BugSack, alerts, toasts, zone text, unit frames...). Guess at the cause: two failing slash commands both showed the same popup.
   - Top-level windows must be at least 120x60. The decision is made once, at the last look (0.3 s), from windows still open; if more than one different window opened, nothing is learned.
@@ -123,4 +124,4 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
   - Bug found and fixed in 0.1.1: Ace3 short commands (`/bt`, `/bt4`, `/dcr`, `/spq`) landed under Atlas (the AceConsole host). Now matched by abbreviation. Slash buttons now sort best fit first.
   - Bartender4 shows no Settings button. Cause not checked.
 - **Linked into the game** (user approved 2026-11-20): `D:\World of Warcraft\_forever_\Interface\AddOns\CombinedAddonMenus` is a junction to the project root `C:\Users\paint\claudeprojects\Games\WorldOfWarcraftMods\ModMenuMod` (re-pointed 2026-11-21 with the user's approval; the game also sees the non-addon files, which it ignores). Anything else under `D:\World of Warcraft\` still needs a new ask. To unlink, use `cmd /c rmdir "<link>"` with no `/s`. NEVER use PowerShell `rmdir` or `Remove-Item -Recurse` on a junction.
-- Not built: loose minimap buttons that don't use LibDataBroker (MinimapButtonButton already gathers those).
+- Loose minimap buttons are scanned since 0.3.23. Not tried in game: buttons that another addon (MinimapButtonButton) re-parents off the Minimap, which the scan cannot see.
