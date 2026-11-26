@@ -66,6 +66,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Status (updated 2026-11-26; newest first; current version is the `## Version:` line in the .toc, 0.3.26 pushed and tagged)
 
+- 0.3.29 (2026-11-26, user request): the drop-down scrolls one row (22 px) per mouse-wheel notch, was two rows. User said the 0.3.28 menu "looks good". Not yet tried in game.
 - 0.3.28 (2026-11-26, user choice after an Opus review): the drop-down is now our own (`Dropdown.lua`), so it scrolls (400 px) without any game menu code. Reason: `SetScrollMode` on the game's menu made it do math on a secret `scrollBarWidth` under our taint. ForeverCore's own menu (GPL) was only studied, not copied. Smoke test passes (mock rows and side menu); not yet tried in game.
 - 0.3.27 (2026-11-26, user error report): the drop-down no longer calls `root:SetScrollMode(500)`. Cause (guess, from the trace): it made the game run `InitScrollLayout`, which did math on a secret `scrollBarWidth` under our taint (Menu.lua:1865). Menu may now be tall with ~45 rows; fallback is grouping addons by letter. Not yet tried in game.
 - 0.3.26 (2026-11-25, user request): default menu button spot moved 12 px up and right (offset 4,4 -> 16,16 from the minimap's bottom-left corner). A position the user saved by moving it is unchanged.

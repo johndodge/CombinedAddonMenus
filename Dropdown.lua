@@ -71,7 +71,7 @@ local function level(i)
   f.scroll:EnableMouseWheel(true)
   f.scroll:SetScript("OnMouseWheel", function(self, delta)
     local range = self:GetVerticalScrollRange() or 0
-    local v = math.max(0, math.min(range, self:GetVerticalScroll() - delta * ROW * 2))
+    local v = math.max(0, math.min(range, self:GetVerticalScroll() - delta * ROW))
     self:SetVerticalScroll(v)
     updateThumb(f)
   end)
