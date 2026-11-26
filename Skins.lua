@@ -92,6 +92,107 @@ Skins.list = {
   },
 }
 
+---------------------------------------------------------------------------
+-- Colour themes #7 to #56 (added 0.3.34). Each one is a few colours; theme() works out the rest.
+-- The number is the position in Skins.order and is shown in the settings page drop-down, so a theme can be
+-- removed by number. They reuse the Classic logo (media\Logo_classic).
+---------------------------------------------------------------------------
+local function hex(str)
+  local r, g, b = str:match("#(%x%x)(%x%x)(%x%x)")
+  return { tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255 }
+end
+local function mix(a, b, t)
+  return { a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t }
+end
+local function withAlpha(c, a) return { c[1], c[2], c[3], a } end
+local BLACK, WHITE_C = { 0, 0, 0 }, { 1, 1, 1 }
+
+-- o: alpha (frame opacity), style ("flat1" default, "flat2", "tip"), font ("arial"), title (hex)
+local function theme(name, desc, bgHex, accHex, textHex, o)
+  o = o or {}
+  local bg, acc, tx = hex(bgHex), hex(accHex), hex(textHex)
+  local light = (0.299 * bg[1] + 0.587 * bg[2] + 0.114 * bg[3]) > 0.55
+  local alpha = o.alpha or 0.97
+  local glass = alpha < 0.9
+  local function edge() return o.style == "tip" and tipEdge() or flat(o.style == "flat2" and 2 or 1) end
+  local arial = o.font == "arial"
+  local title = o.title and hex(o.title) or mix(acc, light and BLACK or WHITE_C, 0.25)
+  local btnBg = mix(bg, acc, light and 0.25 or 0.28)
+  local hover = mix(bg, acc, light and 0.5 or 0.55)
+  local inBg = light and mix(bg, WHITE_C, 0.6) or mix(bg, BLACK, 0.45)
+  local id = "t" .. (#Skins.order + 1)
+  Skins.list[id] = {
+    name = name, desc = desc, logo = "classic",
+    font = arial and ARIALN or FRIZ, size = arial and 13 or 12, titleSize = arial and 16 or 15, pad = 10,
+    frame = edge(),
+    frameBg = withAlpha(bg, alpha), frameBorder = withAlpha(acc, 1),
+    title = title, text = tx, muted = mix(tx, bg, 0.45), line = withAlpha(acc, 0.25),
+    button = { backdrop = edge(), bg = withAlpha(btnBg, glass and 0.5 or 1), border = withAlpha(acc, 1),
+               hover = withAlpha(hover, glass and 0.7 or 1), text = tx },
+    input = { backdrop = edge(), bg = withAlpha(inBg, glass and 0.6 or 1), border = withAlpha(acc, 1), text = tx },
+  }
+  table.insert(Skins.order, id)
+end
+
+theme("Ocean Depths", "Deep sea blue with a bright teal edge.", "#06202e", "#2aa6c9", "#d7f2fb")
+theme("Forest Canopy", "Dark leaf green with fresh green trim.", "#0f2416", "#5fae5a", "#e3f2dc")
+theme("Desert Dusk", "Baked brown with a warm orange glow.", "#2b1b12", "#e0914a", "#f7e3cf")
+theme("Blood Moon", "Near-black red with a crimson edge.", "#1d0606", "#c0282d", "#f3d7d7")
+theme("Royal Purple", "Deep violet with lilac trim.", "#1c0f2e", "#9b6bd6", "#eadcf8")
+theme("Arctic Frost", "Light icy white with steel blue trim.", "#e8f2f8", "#5b9bc4", "#1c3446")
+theme("Sunset", "Dusky plum with a coral edge.", "#2b1230", "#ff7a59", "#ffe6d6")
+theme("Moss and Stone", "Grey-green stone with sage trim.", "#20241d", "#8a9a6b", "#e4e8d8")
+theme("Cherry Blossom", "Pale pink paper with rose trim.", "#fbe8ee", "#d9608a", "#4a1f2f")
+theme("Midnight Gold", "Black with a gold edge.", "#0b0b14", "#d4af37", "#f4ecd0")
+theme("Copper Steam", "Dark brown with copper trim.", "#241710", "#c87533", "#f2dcc4")
+theme("Neon Cyber", "Black with electric cyan lines.", "#0a0a12", "#00f0ff", "#e0fbff", { font = "arial" })
+theme("Synthwave", "Dark purple with hot pink lines.", "#1a0a2e", "#ff2bd6", "#ffe0fa", { font = "arial" })
+theme("Mint Chocolate", "Dark chocolate with mint trim.", "#1f1712", "#5fd6a8", "#e6fff4")
+theme("Slate Minimal", "Quiet grey with a thin steel edge.", "#22262b", "#7d8b99", "#e6eaee", { font = "arial" })
+theme("Ember", "Charcoal brown with a glowing orange edge.", "#1a0c05", "#ff5a1f", "#ffe0cc")
+theme("Lavender Fields", "Light lilac with violet trim.", "#efe9f8", "#8a6fc4", "#2b2142")
+theme("Golden Hour", "Warm cream with amber trim.", "#f6e7bf", "#c9891a", "#3b2a08")
+theme("Toxic Waste", "Black-green with acid green trim.", "#0c1406", "#9dff1a", "#eaffc2", { font = "arial" })
+theme("Steel Blue", "Dark navy grey with steel blue trim.", "#15202c", "#4b7fb5", "#dce8f5")
+theme("Rose Gold", "Dark rosewood with a rose gold edge.", "#2a1a1c", "#e0a8a0", "#fbe9e5")
+theme("Obsidian", "Almost black with a graphite edge.", "#08080a", "#5c5c66", "#d9d9de", { font = "arial" })
+theme("Emerald City", "Deep green with a bright emerald edge.", "#06241c", "#1fcf8e", "#d6fff0")
+theme("Candy", "Pale pink with a bubblegum edge.", "#fff0f6", "#ff5fa2", "#4a1a33")
+theme("Storm Cloud", "Grey-blue with a pale blue edge.", "#2a2f38", "#8fb0d6", "#eef3fa")
+theme("Autumn Leaves", "Dark brown with a pumpkin edge.", "#2a1608", "#d9741a", "#fbe3c4")
+theme("Pine and Snow", "Snow white with pine green trim.", "#f3f7f4", "#2f6b4a", "#14291d")
+theme("Violet Ember", "Dark violet with an ember orange edge.", "#170a24", "#ff6a3d", "#f6e2ff")
+theme("Ice Cave", "Clear icy glass with a bright cyan edge.", "#0a1c26", "#8be9ff", "#e8fbff", { alpha = 0.75, style = "tip" })
+theme("Honey", "Dark amber with a honey gold edge.", "#2a1f08", "#f2b526", "#fff0c2")
+theme("Plum Wine", "Dark wine with a magenta edge.", "#240b1a", "#b03a78", "#f7dcea")
+theme("Dusty Rose", "Muted mauve with a pink edge.", "#3a2a2e", "#c98a97", "#f6e8ea")
+theme("Sandstone", "Light sand with a bronze edge.", "#e9dcc2", "#a86a2e", "#3a2612")
+theme("Deep Space", "Near-black blue with a periwinkle edge.", "#03030a", "#6a7bff", "#dfe3ff")
+theme("Aurora", "Dark teal with green lines and violet titles.", "#07181a", "#4cf0a0", "#e0fff0", { title = "#b58cff" })
+theme("Coffee House", "Espresso brown with a latte edge.", "#1e140d", "#a47148", "#f0e0d0")
+theme("Lemon Lime", "Pale lemon with a lime green edge.", "#f7fbe0", "#7cb518", "#26340a")
+theme("Crimson Knight", "Black with a bold red edge.", "#14090c", "#d41f3c", "#f5dde1", { style = "flat2" })
+theme("Teal and Orange", "Teal background with an orange edge.", "#0b2a30", "#ff8a3d", "#e0f5f5")
+theme("Graphite Mint", "Graphite grey with a mint edge.", "#1b1f1e", "#3ddc97", "#e5f0eb", { font = "arial" })
+theme("Parchment Night", "Dark old paper with a pale gold edge.", "#2a2418", "#cbb27a", "#f1e6c8")
+theme("Sky", "Light sky blue with a clear blue edge.", "#dff0fb", "#2d86c8", "#0f2f47")
+theme("Monochrome", "Black and white, nothing else.", "#111111", "#ffffff", "#eeeeee", { font = "arial" })
+theme("Bubblegum Dark", "Dark purple with a pink edge.", "#1a1020", "#ff77c8", "#ffe3f5")
+theme("Jade Temple", "Dark jade with a pale gold edge.", "#0e2a24", "#d8c37a", "#f1eddc")
+theme("Volcano", "Black with a molten red edge.", "#140606", "#ff3b1f", "#ffd9c9", { style = "flat2" })
+theme("Twilight Blue", "Evening blue with a soft blue edge.", "#121a3a", "#7fa0ff", "#e6ecff")
+theme("Terminal Amber", "Black screen with amber text, like an old terminal.", "#0a0600", "#ffb000", "#ffcf66", { font = "arial", title = "#ffb000" })
+theme("Orchid", "Pale orchid with a purple edge.", "#f6ecf8", "#b24bd1", "#38154a")
+theme("Sage", "Pale sage green with a green edge.", "#dfe6d3", "#5f7a4a", "#25301c")
+
+-- Number of each theme (its place in the list). Skins.label(id) = "[7] Ocean Depths".
+Skins.number = {}
+for i, id in ipairs(Skins.order) do Skins.number[id] = i end
+function Skins.label(id)
+  local sk = Skins.list[id]
+  return "[" .. (Skins.number[id] or "?") .. "] " .. (sk and sk.name or id)
+end
+
 function Skins.current()
   local id = ns.db and ns.db.skin
   return Skins.list[id] or Skins.list.classic, (Skins.list[id] and id or "classic")

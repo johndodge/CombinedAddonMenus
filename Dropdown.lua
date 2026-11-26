@@ -4,6 +4,8 @@
 -- This drop-down uses no game menu code. Each level scrolls with the mouse wheel and is painted with the current skin.
 --
 -- Dropdown.open(anchor, entries): entries = { { text = "Name", func = function() end }, { text = "Name", children = { ...entries } } }
+-- Optional per entry: onEnter(entry) runs when the mouse is on it. Optional on the list: onClose() runs when the menu closes;
+-- side = "right" opens the first level beside the anchor instead of below or above it.
 -- An entry with children opens a side menu when the mouse is on it. An entry with func runs it on click and closes everything.
 
 local ADDON, ns = ...
@@ -102,6 +104,9 @@ local function level(i)
     if self.depth == 1 then
       if catcher then catcher:Hide() end
       if ns.UI.freeEscSlot then ns.UI.freeEscSlot(ESC_NAME) end
+      local fn = self.onClose
+      self.onClose = nil
+      if fn then fn() end
     end
   end)
   levels[i] = f
@@ -132,6 +137,7 @@ local function makeRow(f)
   b:RegisterForClicks("LeftButtonUp")
   b:HookScript("OnEnter", function(self)
     closeFrom(self.depth + 1)
+    if self.entry and self.entry.onEnter then self.entry.onEnter(self.entry) end
     if self.entry and self.entry.children then Dropdown.open(self, self.entry.children, self.depth + 1) end
   end)
   b:SetScript("OnClick", function(self)
@@ -201,11 +207,14 @@ function Dropdown.open(anchor, entries, depth)
   f.scroll:SetVerticalScroll(0)
   f.target = 0
 
+  f.onClose = depth == 1 and entries.onClose or nil
   f:ClearAllPoints()
   local scale = UIParent:GetHeight() or 768
   if depth == 1 then
     local _, y = anchor:GetCenter()
-    if y and y > scale / 2 then
+    if entries.side == "right" then
+      f:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 4, 0)
+    elseif y and y > scale / 2 then
       f:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -2)
     else
       f:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 2)

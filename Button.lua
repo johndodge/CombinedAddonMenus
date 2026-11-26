@@ -107,7 +107,8 @@ local function create()
 end
 
 function Button.logoPath(skinId)
-  return "Interface\\AddOns\\CombinedAddonMenus\\media\\Logo_" .. skinId
+  local sk = ns.Skins.list[skinId]
+  return "Interface\\AddOns\\CombinedAddonMenus\\media\\Logo_" .. ((sk and sk.logo) or skinId)
 end
 
 function Button.applySkin()

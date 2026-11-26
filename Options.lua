@@ -320,42 +320,29 @@ end
 
 local function skinGrid()
   local _, currentId = ns.Skins.current()
-  for i, id in ipairs(ns.Skins.order) do
-    local skin = ns.Skins.list[id]
-    local b = take("skin", function()
-      local nb = ns.UI.makeButton(content)
-      nb:SetSize(180, 28)
-      nb.logo = nb:CreateTexture(nil, "OVERLAY")
-      nb.logo:SetSize(20, 20)
-      nb.logo:SetPoint("LEFT", 5, 0)
-      nb.label:ClearAllPoints()
-      nb.label:SetPoint("CENTER", 11, 0)   -- leave room for the logo
-      nb:SetScript("OnClick", function(self) ns.Skins.set(self.skinId) end)
-      nb:HookScript("OnEnter", function(self)
-        paintPreview(self.skinId)   -- pointing at a skin shows it in the preview
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine(ns.Skins.list[self.skinId].name)
-        GameTooltip:AddLine(ns.Skins.list[self.skinId].desc, 1, 1, 1, true)
-        GameTooltip:Show()
-      end)
-      nb:HookScript("OnLeave", function()
-        GameTooltip:Hide()
-        local _, id = ns.Skins.current()
-        paintPreview(id)
-      end)
-      return nb
+  local b = take("skin", function()
+    local nb = ns.UI.makeButton(content)
+    nb:SetSize(330, 28)
+    nb:SetScript("OnClick", function(self)
+      local _, cur = ns.Skins.current()
+      local entries = { side = "right", onClose = function() local _, id = ns.Skins.current() paintPreview(id) end }
+      for _, id in ipairs(ns.Skins.order) do
+        entries[#entries + 1] = {
+          text = (id == cur and "> " or "") .. ns.Skins.label(id),
+          func = function() ns.Skins.set(id) end,
+          onEnter = function() paintPreview(id) end,   -- pointing at a skin shows it in the preview
+        }
+      end
+      ns.Dropdown.open(self, entries)
     end)
-    b.skinId = id
-    -- Each button is drawn in the skin it picks, as a preview.
-    ns.Skins.paintButton(b, skin, skin.button)
-    b.logo:SetTexture(ns.Button.logoPath(id))
-    b:SetLabel(id == currentId and ("> " .. skin.name .. " <") or skin.name)
-    local col, row = (i - 1) % 3, math.floor((i - 1) / 3)
-    b:SetPoint("TOPLEFT", 16 + col * 190, -(y + row * 34))
-  end
-  y = y + math.ceil(#ns.Skins.order / 3) * 34 + 4
+    return nb
+  end)
+  ns.Skins.paintButton(b, ns.Skins.current(), ns.Skins.current().button)
+  b:SetLabel("Skin: " .. ns.Skins.label(currentId) .. "   (click to choose)")
+  b:SetPoint("TOPLEFT", 16, -y)
+  y = y + 36
   local current = ns.Skins.list[currentId]
-  para("Current skin: " .. current.name .. ". " .. current.desc)
+  para("Current skin: " .. ns.Skins.label(currentId) .. ". " .. current.desc)
   preview = preview or makePreview()
   preview:ClearAllPoints()
   preview:SetPoint("TOPLEFT", 16, -y)
@@ -372,7 +359,7 @@ function Options.build()
   y = y + 34
 
   header("Skin")
-  para("Click a skin to use it. It changes at once. Point at a skin to see it in the preview below.")
+  para("Click the button and pick a skin from the list. It changes at once. Point at a skin to see it in the preview below. Each skin has a number, so you can name it when you want one removed.")
   skinGrid()
 
   header("The menu button")
