@@ -79,6 +79,15 @@ function fire(event, arg)
   end
 end
 function IsAltKeyDown() return altDown end
+ctrlDown = false
+function IsControlKeyDown() return ctrlDown end
+-- Mock of the game's drop-down menu: records the entries and their side-menu entries.
+menuLog = nil
+local function mkNode(label, fn) local n = { label = label, fn = fn, kids = {} }
+  function n:CreateButton(l, f) local k = mkNode(l, f) table.insert(self.kids, k) return k end
+  function n:SetScrollMode() end
+  return n end
+MenuUtil = { CreateContextMenu = function(owner, gen) local root = mkNode("root") gen(owner, root) menuLog = root end }
 function GetTime() return 100 end
 UIParent = newObj("UIParent")
 GameTooltip = newObj()
@@ -478,9 +487,23 @@ def main():
         lua.execute("SettingsPanel:Hide()")
         was = bool(ns.UI.isShown())
         mbtn.Click(mbtn, "LeftButton")
-        check(bool(ns.UI.isShown()) != was, "left-click on the M button must toggle the list")
+        check(bool(ns.UI.isShown()) == was, "a plain click on the menu button must not toggle the list")
+        check(G.menuLog is not None and len(G.menuLog.kids) > 3, "a plain click must open the drop-down with one entry per addon")
+        tt = [k for k in G.menuLog.kids.values() if k.label == "TomTom"]
+        check(bool(tt) and len(tt[0].kids) >= 4, "an addon entry must have its buttons in a side menu")
+        if tt:
+            slash = [k for k in tt[0].kids.values() if k.label.startswith("/way")]
+            n0 = len(list(G.calls.values()))
+            slash[0].fn()
+            check(len(list(G.calls.values())) > n0, "a side-menu button must run its action")
+        lua.execute("ctrlDown = true")
+        mbtn.Click(mbtn, "LeftButton")
+        lua.execute("ctrlDown = false")
+        check(bool(ns.UI.isShown()) != was, "ctrl-click on the menu button must toggle the list")
         if not ns.UI.isShown():
+            lua.execute("ctrlDown = true")
             mbtn.Click(mbtn, "LeftButton")
+            lua.execute("ctrlDown = false")
         mbtn.Click(mbtn, "RightButton")
         calls = list(G.calls.values())
         check("open settings 50" in calls, "right-click on the M button must open our settings page")

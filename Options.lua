@@ -378,7 +378,7 @@ function Options.build()
   header("The menu button")
   check("Show the menu button", ns.db.button.show, function(on) ns.Button.setShown(on) end)
   y = y + 30
-  para("Click it to open the list. Right-click it to open this page. Hold Alt and drag it to move it.")
+  para("Click it for a drop-down of your addons. Point at an addon to see its buttons. Ctrl-click it to open the big list. Right-click it to open this page. Hold Alt and drag it to move it.")
   plainButton("Reset its position", function() ns.Button.resetPosition() end)
   y = y + 30
 

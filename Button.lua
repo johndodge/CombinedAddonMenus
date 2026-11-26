@@ -1,6 +1,7 @@
 -- Combined Addon Menus - the small square menu button. It shows the logo of the current skin
 -- (media\Logo_<skin>.tga, drawn by tools/make_icon.py).
--- Left-click: open or close the list. Right-click: open the settings page.
+-- Left-click: a drop-down of every addon, each with its buttons in a side menu. Ctrl-click: open or close the big list.
+-- Right-click: open the settings page.
 -- Hold Alt and drag to move it. The position is saved. The settings page can hide it.
 
 local ADDON, ns = ...
@@ -25,6 +26,32 @@ local function place()
   else
     btn:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -220, -200)
   end
+end
+
+-- The drop-down: one entry per addon in the list; pointing at it opens a side menu with that addon's buttons.
+function Button.showMenu()
+  if not (MenuUtil and MenuUtil.CreateContextMenu) then
+    ns.say("This game version has no drop-down menu support, so the list opened instead.")
+    ns.UI.toggle()
+    return
+  end
+  local ok, rows = pcall(ns.Scan.run)
+  if not ok or #rows == 0 then
+    ns.say("The scan found nothing to show. Ctrl-click the button to open the big list.")
+    return
+  end
+  local owner = btn
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    if root.SetScrollMode then root:SetScrollMode(500) end
+    for _, row in ipairs(rows) do
+      local sub = root:CreateButton(row.title)
+      for _, action in ipairs(row.actions) do
+        sub:CreateButton(action.display or action.label or action.detail, function()
+          ns.UI.runAction(action, owner, "LeftButton")
+        end)
+      end
+    end
+  end)
 end
 
 local function create()
@@ -63,14 +90,17 @@ local function create()
     if self.movedAt and GetTime and GetTime() - self.movedAt < 0.3 then return end
     if mouseButton == "RightButton" then
       ns.UI.openOptions()
-    else
+    elseif IsControlKeyDown and IsControlKeyDown() then
       ns.UI.toggle()
+    else
+      Button.showMenu()
     end
   end)
   btn:HookScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     GameTooltip:AddLine("Combined Addon Menus")
-    GameTooltip:AddLine("Click: open the list of your addons.", 1, 1, 1)
+    GameTooltip:AddLine("Click: drop-down of your addons.", 1, 1, 1)
+    GameTooltip:AddLine("Ctrl-click: open the big list.", 1, 1, 1)
     GameTooltip:AddLine("Right-click: settings.", 1, 1, 1)
     GameTooltip:AddLine("Alt + drag: move this button.", 1, 1, 1)
     GameTooltip:Show()
