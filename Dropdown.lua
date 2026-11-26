@@ -11,6 +11,7 @@ local Dropdown = {}
 ns.Dropdown = Dropdown
 
 local ROW, MAXH, PAD, MINW, MAXW = 22, 400, 4, 130, 340
+local SMOOTH = 16   -- glide speed: higher is snappier
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local ESC_NAME = "CombinedAddonMenusDrop1"
 
@@ -69,10 +70,20 @@ local function level(i)
   f.body:SetSize(10, 10)
   f.scroll:SetScrollChild(f.body)
   f.scroll:EnableMouseWheel(true)
+  -- Smooth scrolling: the wheel moves a target spot, and every frame the list glides a share of the way there.
+  f.target = 0
   f.scroll:SetScript("OnMouseWheel", function(self, delta)
     local range = self:GetVerticalScrollRange() or 0
-    local v = math.max(0, math.min(range, self:GetVerticalScroll() - delta * ROW))
-    self:SetVerticalScroll(v)
+    f.target = math.max(0, math.min(range, (f.target or self:GetVerticalScroll()) - delta * ROW))
+  end)
+  f.scroll:SetScript("OnUpdate", function(self, elapsed)
+    local target = f.target
+    if not target then return end
+    local cur = self:GetVerticalScroll() or 0
+    if cur == target then return end
+    local nxt = cur + (target - cur) * math.min(1, (elapsed or 0.016) * SMOOTH)
+    if math.abs(target - nxt) < 0.5 then nxt = target end
+    self:SetVerticalScroll(nxt)
     updateThumb(f)
   end)
   f.thumb = f:CreateTexture(nil, "OVERLAY")
@@ -163,6 +174,7 @@ function Dropdown.open(anchor, entries, depth)
   f:SetSize(width, math.min(contentH, MAXH) + PAD * 2)
   f.body:SetSize(width - PAD * 2, contentH)
   f.scroll:SetVerticalScroll(0)
+  f.target = 0
 
   f:ClearAllPoints()
   local scale = UIParent:GetHeight() or 768
