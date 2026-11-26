@@ -42,7 +42,6 @@ function Button.showMenu()
   end
   local owner = btn
   MenuUtil.CreateContextMenu(owner, function(_, root)
-    if root.SetScrollMode then root:SetScrollMode(500) end
     for _, row in ipairs(rows) do
       local sub = root:CreateButton(row.title)
       for _, action in ipairs(row.actions) do
