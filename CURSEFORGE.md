@@ -16,13 +16,18 @@ Some addons hide their options behind a slash command. Others put them on a mini
 - **No duplicate buttons.** If two buttons open the same thing, the addon notices the first time you use them and joins them into one button. The button shows every name, for example `Minimap = /ttwin`, and it tells you in chat when it does this. Shift-click a combined button to split it again, or type `/cam reset` to split all of them.
 - **Clean up your minimap.** Other addons' minimap icons are hidden by default. Tick the ones you want to see on the settings page, or use Select all / Deselect all. You can still open those addons from the list.
 - **Blacklist.** Hide addons you never want to see in the list.
-- **Six skins.** Each skin has its own logo. A live preview on the settings page shows each skin before you pick it.
+- **14 skins.** Pick one from a numbered list on the settings page. A live preview shows each skin before you choose it. Every skin has its own look, not just its own colours.
   - **Classic:** the game's dialog look, with gold text
   - **Gnomish Workshop:** dark slate, brass edges, teal buttons
-  - **Midnight:** flat black with violet lines
-  - **Parchment:** light paper, dark ink, the game's sharp serif font
-  - **Fel Terminal:** black screen with neon green text
   - **Frostglass:** smoky icy blue glass
+  - **Ocean Depths, Arctic Frost, Smoked Glass:** see-through glass in three moods
+  - **Forest Canopy, Moss and Stone:** old-fashioned bordered frames in greens
+  - **Sunset:** dusky plum with a coral glow that scrolls with the list
+  - **Teal and Orange:** a clean panel with one orange bar
+  - **Ledger:** cream bookkeeping paper with green ruled lines and a red margin
+  - **Foundry:** a bolted iron plate lit from below
+  - **Porcelain:** blue-and-white china
+  - **Warpaint:** a rough orc banner
 - **Small menu button.** Click it for a drop-down of your addons, in your chosen skin. Scroll it with the mouse wheel. Point at an addon to see its buttons. Ctrl-click it to open the big list. Right-click it to open the settings. Hold **Alt** and drag it to move it. You can hide it from the settings page.
 - **Search box** to filter the list by addon name or button name.
 - **Keybinding** under Key Bindings > AddOns.
@@ -52,6 +57,12 @@ Some addons open their menu in a way the scan can't see. You can add your own bu
 Found an addon whose menu doesn't show up? Please report it in the comments. Include the result of `/cam debug`.
 
 ## Version history
+
+**0.3.39**
+- New skin list: one Skin button on the settings page opens a numbered, scrolling list of 14 skins.
+- 11 new skins, each with its own look: Ocean Depths, Forest Canopy, Arctic Frost, Sunset, Moss and Stone, Teal and Orange, Ledger, Foundry, Smoked Glass, Porcelain, Warpaint.
+- The Midnight, Parchment and Fel Terminal skins were removed. If you used one, the addon switches you to Classic.
+- A skin's colour gradient now scrolls with the list, so each addon keeps its place in the colours.
 
 **0.3.33**
 - Fixed an error when clicking the menu button ("attempt to perform arithmetic on local 'scrollBarWidth'").
