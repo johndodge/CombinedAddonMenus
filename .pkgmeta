@@ -3,6 +3,7 @@ package-as: CombinedAddonMenus
 ignore:
   - CLAUDE.md
   - CURSEFORGE.md
+  - CHANGELOG.md
   - FINDINGS.md
   - PLAN.md
   - tools

@@ -5,7 +5,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 ## Where things are
 
 - `FINDINGS.md`: what the client supports, proved by in-game probes on 2026-11-20. Read it before changing the scan code.
-- **The repo root IS the addon** (changed 2026-11-21 so CurseForge's automatic packaging finds the `.toc` in the root). `.pkgmeta` sets `package-as: CombinedAddonMenus` and ignores `CLAUDE.md`, `CURSEFORGE.md`, `FINDINGS.md`, `PLAN.md`, `tools`, `dist`. Anything new that must not ship goes in the `.pkgmeta` ignore list. Older notes below that say `addon/CombinedAddonMenus/` mean the repo root.
+- **The repo root IS the addon** (changed 2026-11-21 so CurseForge's automatic packaging finds the `.toc` in the root). `.pkgmeta` sets `package-as: CombinedAddonMenus` and ignores `CLAUDE.md`, `CURSEFORGE.md`, `CHANGELOG.md`, `FINDINGS.md`, `PLAN.md`, `tools`, `dist`. Anything new that must not ship goes in the `.pkgmeta` ignore list. Older notes below that say `addon/CombinedAddonMenus/` mean the repo root.
   - `CombinedAddonMenus.toc`: `## Interface: 16001` only (WoW Forever = 1.60.1). Changed 2026-11-22: CurseForge copies this line into the file's game versions, and the user wants Forever only for now. Retail numbers (12.1.5 = 120105, 12.1.7 = 120107) can be added back later.
   - `Scan.lua`: finds the menus. Five sources: Settings pages, Addon Compartment (minimap dropdown), LibDataBroker launchers (minimap buttons), loose minimap buttons (since 0.3.23: addons that make their own button without LibDBIcon, e.g. Spy, X-Perl, BuffRadar, Lore Forever; found by `Options.looseButtons`), slash commands.
   - `Skins2.lua`: five designed skins (numbers 10-14) plus the `Extra` drawing part (`deco.margin`) (see Status 0.3.37).
@@ -24,12 +24,12 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 
 ## Release process (user, 2026-11-21; updated 2026-11-22)
 
-1. **While changing or testing:** every change or test build gets a commit and a version bump (0.3.x, `## Version:` in the `.toc`, plus a Status line below). Do not touch the CurseForge description or version history in this stage. Different tries are not release notes.
+1. **While changing or testing:** every change or test build gets a commit and a version bump (0.3.x, `## Version:` in the `.toc`, plus a Status line below). Do not touch the CurseForge description or `CHANGELOG.md` in this stage. Different tries are not release notes.
 2. **Always copy changes to the local game copy.** The game folder is a junction to this project root, so edits are live in game after `/reload`. Standing permission from the user (2026-11-22): no need to ask each time. Do NOT push to GitHub or tag until the user says testing passed.
 3. **When the user says testing passed and the change is fully understood, do these in this order (user, 2026-11-26):** (a) update `CURSEFORGE.md` (description if features changed) and add an entry to the **Version history** at the top of that section; (b) rebuild the zip with `python tools/build_zip.py` (forward-slash paths, honors `.pkgmeta`; never `Compress-Archive`; zip is for manual upload only, `dist` is not in git); (c) commit; (d) push to GitHub; (e) push the tag (see below) after the user says to. Never push or tag before the history entry is committed.
-4. Version history lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a history entry for a build that is still being tried.
+4. `CHANGELOG.md` lists only what the user can see or feel, in plain words, for versions that passed testing. Never write a changelog entry for a build that is still being tried.
 5. Ask the user if unsure whether testing has passed.
-6. **Notes on every push (user, 2026-11-26):** every commit message says in plain words what changed (not just a version number). Every release tag is an annotated tag (`git tag -a <name> -m "<one or two lines: what the user can see or feel>"`) with the same wording as the Version history entry. Before a push, check that `CURSEFORGE.md` has an entry for the `## Version:` in the `.toc`; if not, stop and say so. Nothing enforces this automatically (no git hook), so it is a rule for Claude.
+6. **Notes on every push (user, 2026-11-26):** every commit message says in plain words what changed (not just a version number). Every release tag is an annotated tag (`git tag -a <name> -m "<one or two lines: what the user can see or feel>"`) with the same wording as the Version history entry. Before a push, check that `CHANGELOG.md` has an entry for the `## Version:` in the `.toc`; if not, stop and say so. Nothing enforces this automatically (no git hook), so it is a rule for Claude.
 
 ### Tag format (user chose option A, 2026-11-22)
 
@@ -52,7 +52,7 @@ A WoW Forever addon that opens one list of every installed addon, with a button 
 - 2026-11-22: the small square button is the "menu button" in all player text, because its picture is no longer an M. The saved setting key `button` keeps its name so saved positions survive.
 - 2026-11-22: game versions are WoW Forever only (`## Interface: 16001`).
 - 2026-11-22: releases are beta tags in the format above.
-- Published on CurseForge under the **MIT** license, author **Tieme** (`LICENSE.txt` in the repo root, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`.
+- Published on CurseForge under the **MIT** license, author **Tieme** (`LICENSE.txt` in the repo root, `## Author` in the .toc). Third-party access allowed was recommended. Description text: `CURSEFORGE.md`; the user pastes it into the CurseForge author console by hand (Claude cannot push it; user decision 2026-11-26). It must not contain the changelog.
 
 - Name: **Combined Addon Menus** (folder `CombinedAddonMenus`).
 - Automatic scan plus a small hand-made list for gaps.
