@@ -20,7 +20,7 @@ local function tipEdge()
 end
 
 -- Order shown on the settings page.
-Skins.order = { "classic", "gnomish", "midnight", "parchment", "fel", "frost" }
+Skins.order = { "classic", "gnomish", "frost" }
 
 Skins.list = {
   classic = {
@@ -45,39 +45,6 @@ Skins.list = {
     button = { backdrop = flat(1), bg = { 0.04, 0.33, 0.36, 1 }, border = { 0.78, 0.56, 0.25, 1 },
                hover = { 0.07, 0.5, 0.54, 1 }, text = { 1, 1, 1 } },
     input = { backdrop = flat(1), bg = { 0.05, 0.06, 0.07, 1 }, border = { 0.78, 0.56, 0.25, 1 }, text = { 0.86, 0.92, 0.94 } },
-  },
-  midnight = {
-    name = "Midnight",
-    desc = "Flat near-black with thin violet lines and white text.",
-    font = ARIALN, size = 13, titleSize = 16, pad = 10,
-    frame = flat(1),
-    frameBg = { 0.035, 0.035, 0.05, 0.97 }, frameBorder = { 0.45, 0.3, 0.85, 1 },
-    title = { 0.78, 0.68, 1 }, text = { 0.95, 0.95, 1 }, muted = { 0.5, 0.48, 0.6 }, line = { 0.45, 0.3, 0.85, 0.2 },
-    button = { backdrop = flat(1), bg = { 0.1, 0.08, 0.16, 1 }, border = { 0.35, 0.25, 0.6, 1 },
-               hover = { 0.24, 0.17, 0.42, 1 }, text = { 1, 1, 1 } },
-    input = { backdrop = flat(1), bg = { 0.07, 0.06, 0.1, 1 }, border = { 0.35, 0.25, 0.6, 1 }, text = { 1, 1, 1 } },
-  },
-  parchment = {
-    name = "Parchment",
-    desc = "Light paper and dark ink, in the game's own sharp font.",
-    font = FRIZ, size = 13, titleSize = 17, pad = 10,
-    frame = flat(2),
-    frameBg = { 0.92, 0.85, 0.69, 1 }, frameBorder = { 0.36, 0.22, 0.1, 1 },
-    title = { 0.36, 0.14, 0.04 }, text = { 0.2, 0.12, 0.05 }, muted = { 0.45, 0.35, 0.25 }, line = { 0.36, 0.22, 0.1, 0.25 },
-    button = { backdrop = flat(1), bg = { 0.8, 0.69, 0.48, 1 }, border = { 0.45, 0.3, 0.15, 1 },
-               hover = { 0.7, 0.57, 0.36, 1 }, text = { 0.2, 0.1, 0.02 } },
-    input = { backdrop = flat(1), bg = { 0.97, 0.93, 0.82, 1 }, border = { 0.45, 0.3, 0.15, 1 }, text = { 0.2, 0.12, 0.05 } },
-  },
-  fel = {
-    name = "Fel Terminal",
-    desc = "Black screen and neon green text, like an old computer.",
-    font = ARIALN, size = 13, titleSize = 16, pad = 10,
-    frame = flat(1),
-    frameBg = { 0, 0.03, 0, 0.96 }, frameBorder = { 0.2, 1, 0.2, 1 },
-    title = { 0.45, 1, 0.45 }, text = { 0.3, 0.95, 0.3 }, muted = { 0.15, 0.55, 0.15 }, line = { 0.2, 1, 0.2, 0.15 },
-    button = { backdrop = flat(1), bg = { 0, 0.1, 0, 1 }, border = { 0.2, 0.8, 0.2, 1 },
-               hover = { 0, 0.28, 0, 1 }, text = { 0.55, 1, 0.55 } },
-    input = { backdrop = flat(1), bg = { 0, 0, 0, 1 }, border = { 0.2, 0.8, 0.2, 1 }, text = { 0.55, 1, 0.55 } },
   },
   frost = {
     name = "Frostglass",
@@ -334,7 +301,7 @@ local function theme(name, desc, bgHex, accHex, textHex, feel, o)
   local inBg = light and mix(bg, WHITE_C, 0.6) or mix(bg, BLACK, 0.45)
   local btn = buttonStyle(f.btn, bg, acc, tx, light, glass, edge)
   local input = { backdrop = edge(), bg = withAlpha(inBg, glass and 0.6 or 1), border = withAlpha(acc, 1), text = tx }
-  local id = "t" .. (#Skins.order + 1)
+  local id = "t_" .. name:lower():gsub("[^%w]", "")
   Skins.list[id] = {
     name = name, desc = desc .. " " .. f.label, logo = "classic", feel = feel,
     font = arial and ARIALN or FRIZ, flags = f.flags, size = arial and 13 or 12, titleSize = arial and 16 or 15, pad = 10,
@@ -348,54 +315,10 @@ end
 
 theme("Ocean Depths", "Clear sea water over a deep blue.", "#06202e", "#2aa6c9", "#d7f2fb", "glass")
 theme("Forest Canopy", "Dark leaves and soft green light.", "#0f2416", "#5fae5a", "#e3f2dc", "rustic")
-theme("Desert Dusk", "Baked brown fading into an orange glow.", "#2b1b12", "#e0914a", "#f7e3cf", "dusk")
-theme("Blood Moon", "Heavy dark iron with a crimson bar.", "#1d0606", "#c0282d", "#f3d7d7", "forge")
-theme("Royal Purple", "A formal violet frame with lilac lines.", "#1c0f2e", "#9b6bd6", "#eadcf8", "etched")
 theme("Arctic Frost", "Pale frosted glass with steel blue lines.", "#e8f2f8", "#5b9bc4", "#1c3446", "glass")
 theme("Sunset", "Dusky plum warming to coral at the bottom.", "#2b1230", "#ff7a59", "#ffe6d6", "dusk")
 theme("Moss and Stone", "Grey stone with moss-green trim.", "#20241d", "#8a9a6b", "#e4e8d8", "rustic")
-theme("Cherry Blossom", "Pink paper with a rose border.", "#fbe8ee", "#d9608a", "#4a1f2f", "paper")
-theme("Midnight Gold", "Black velvet with a gold double line.", "#0b0b14", "#d4af37", "#f4ecd0", "etched")
-theme("Copper Steam", "Riveted copper plate with a heavy top bar.", "#241710", "#c87533", "#f2dcc4", "forge")
-theme("Neon Cyber", "A cyan neon sign on black.", "#0a0a12", "#00f0ff", "#e0fbff", "neon")
-theme("Synthwave", "Hot pink neon over dark purple.", "#1a0a2e", "#ff2bd6", "#ffe0fa", "neon")
-theme("Mint Chocolate", "Chocolate brown with mint trim.", "#1f1712", "#5fd6a8", "#e6fff4", "rustic")
-theme("Slate Minimal", "Quiet grey, one thin bar, nothing else.", "#22262b", "#7d8b99", "#e6eaee", "minimal")
-theme("Ember", "Dark iron with glowing coals at the bottom.", "#1a0c05", "#ff5a1f", "#ffe0cc", "forge", { sheen = { top = 0, bot = 0.3, color = "accent" } })
-theme("Lavender Fields", "Lilac paper with a violet border.", "#efe9f8", "#8a6fc4", "#2b2142", "paper")
-theme("Golden Hour", "Cream letterhead with an amber bar.", "#f6e7bf", "#c9891a", "#3b2a08", "stationery")
-theme("Toxic Waste", "Green phosphor screen with scan lines.", "#0c1406", "#9dff1a", "#eaffc2", "terminal")
-theme("Steel Blue", "Navy grey with one steel blue bar.", "#15202c", "#4b7fb5", "#dce8f5", "minimal")
-theme("Rose Gold", "Rosewood with a fine rose gold double line.", "#2a1a1c", "#e0a8a0", "#fbe9e5", "etched")
-theme("Obsidian", "Black glass screen, faint lines.", "#08080a", "#5c5c66", "#d9d9de", "terminal", { scan = { gap = 4, a = 0.05 } })
-theme("Emerald City", "Deep green glowing emerald at the bottom.", "#06241c", "#1fcf8e", "#d6fff0", "dusk")
-theme("Candy", "Pink stationery with a bubblegum bar.", "#fff0f6", "#ff5fa2", "#4a1a33", "stationery")
-theme("Storm Cloud", "Cloud grey with one pale blue bar.", "#2a2f38", "#8fb0d6", "#eef3fa", "minimal")
-theme("Autumn Leaves", "Brown bark with pumpkin trim.", "#2a1608", "#d9741a", "#fbe3c4", "rustic")
-theme("Pine and Snow", "Snow white with a pine green bar.", "#f3f7f4", "#2f6b4a", "#14291d", "stationery")
-theme("Violet Ember", "Violet night with an orange neon glow.", "#170a24", "#ff6a3d", "#f6e2ff", "neon")
-theme("Ice Cave", "See-through ice with a bright cyan rim.", "#0a1c26", "#8be9ff", "#e8fbff", "glass", { alpha = 0.6 })
-theme("Honey", "Dark amber with golden trim.", "#2a1f08", "#f2b526", "#fff0c2", "rustic")
-theme("Plum Wine", "Wine red with a soft magenta glow.", "#240b1a", "#b03a78", "#f7dcea", "neon", { glow = { { inset = -1, a = 0.4 } } })
-theme("Dusty Rose", "Muted mauve with one rose bar.", "#3a2a2e", "#c98a97", "#f6e8ea", "minimal")
-theme("Sandstone", "Sand-coloured paper with a bronze border.", "#e9dcc2", "#a86a2e", "#3a2612", "paper")
-theme("Deep Space", "Black space with a blue horizon glow.", "#03030a", "#6a7bff", "#dfe3ff", "dusk", { sheen = { top = 0, bot = 0.4, color = "accent" } })
-theme("Aurora", "Green-lit glass with violet titles.", "#07181a", "#4cf0a0", "#e0fff0", "glass", { title = "#b58cff", alpha = 0.7 })
-theme("Coffee House", "Espresso wood with latte trim.", "#1e140d", "#a47148", "#f0e0d0", "rustic")
-theme("Lemon Lime", "Lemon paper with a lime bar.", "#f7fbe0", "#7cb518", "#26340a", "stationery")
-theme("Crimson Knight", "Black armour plate with a bold red bar.", "#14090c", "#d41f3c", "#f5dde1", "forge")
 theme("Teal and Orange", "Teal panel with one orange bar.", "#0b2a30", "#ff8a3d", "#e0f5f5", "minimal")
-theme("Graphite Mint", "Graphite screen with mint text.", "#1b1f1e", "#3ddc97", "#e5f0eb", "terminal")
-theme("Parchment Night", "Old paper by candlelight, double gold line.", "#2a2418", "#cbb27a", "#f1e6c8", "etched")
-theme("Sky", "Bright morning glass.", "#dff0fb", "#2d86c8", "#0f2f47", "glass", { alpha = 0.8 })
-theme("Monochrome", "Black and white screen, tight scan lines.", "#111111", "#ffffff", "#eeeeee", "terminal", { scan = { gap = 2, a = 0.08 } })
-theme("Bubblegum Dark", "Dark purple with a pink neon sign.", "#1a1020", "#ff77c8", "#ffe3f5", "neon")
-theme("Jade Temple", "Dark jade with a gold double line.", "#0e2a24", "#d8c37a", "#f1eddc", "etched")
-theme("Volcano", "Black rock with molten red at the base.", "#140606", "#ff3b1f", "#ffd9c9", "forge", { sheen = { top = 0, bot = 0.35, color = "accent" } })
-theme("Twilight Blue", "Evening blue with a soft glow at the bottom.", "#121a3a", "#7fa0ff", "#e6ecff", "dusk")
-theme("Terminal Amber", "Amber screen like an old terminal.", "#0a0600", "#ffb000", "#ffcf66", "terminal", { title = "#ffb000" })
-theme("Orchid", "Pale orchid paper with a purple border.", "#f6ecf8", "#b24bd1", "#38154a", "paper")
-theme("Sage", "Sage paper with a green border.", "#dfe6d3", "#5f7a4a", "#25301c", "paper")
 
 -- Number of each theme (its place in the list). Skins.label(id) = "[7] Ocean Depths".
 Skins.number = {}
