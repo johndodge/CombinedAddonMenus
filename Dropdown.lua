@@ -41,10 +41,16 @@ local function makeCatcher()
   catcher:Hide()
 end
 
+-- How far this level can scroll: content height minus visible height, worked out here (not read from the game,
+-- whose answer can lag a frame and let the list scroll past its last row, leaving white space).
+local function scrollRange(f)
+  return math.max(0, (f.contentH or 0) - (f.viewH or 0))
+end
+
 local function updateThumb(f)
-  local range = f.scroll:GetVerticalScrollRange() or 0
+  local range = scrollRange(f)
   if range <= 0 then f.thumb:Hide() return end
-  local h = f.scroll:GetHeight()
+  local h = f.viewH
   local total = h + range
   local th = math.max(16, h * h / total)
   local y = (f.scroll:GetVerticalScroll() / range) * (h - th)
@@ -73,7 +79,7 @@ local function level(i)
   -- Smooth scrolling: the wheel moves a target spot, and every frame the list glides a share of the way there.
   f.target = 0
   f.scroll:SetScript("OnMouseWheel", function(self, delta)
-    local range = self:GetVerticalScrollRange() or 0
+    local range = scrollRange(f)
     f.target = math.max(0, math.min(range, (f.target or self:GetVerticalScroll()) - delta * ROW * 2))
   end)
   f.scroll:SetScript("OnUpdate", function(self, elapsed)
@@ -81,6 +87,7 @@ local function level(i)
     if not target then return end
     local cur = self:GetVerticalScroll() or 0
     if cur == target then return end
+    target = math.min(target, scrollRange(f))
     local nxt = cur + (target - cur) * math.min(1, (elapsed or 0.016) * SMOOTH)
     if math.abs(target - nxt) < 0.5 then nxt = target end
     self:SetVerticalScroll(nxt)
@@ -173,6 +180,7 @@ function Dropdown.open(anchor, entries, depth)
   local contentH = #entries * ROW
   f:SetSize(width, math.min(contentH, MAXH) + PAD * 2)
   f.body:SetSize(width - PAD * 2, contentH)
+  f.contentH, f.viewH = contentH, math.min(contentH, MAXH)
   f.scroll:SetVerticalScroll(0)
   f.target = 0
 
